@@ -11,7 +11,79 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9323b3dc-576f-4721-af49-ad2cc45a7bea" name="Default" comment="" />
+    <list default="true" id="9323b3dc-576f-4721-af49-ad2cc45a7bea" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/Lab_Session_1/lab_1.cpp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Lab_session_2/Lab_2.cpp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Lab_session_2/functions.cpp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Lab_session_2/functions.h" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Lab_session_3/Lab_3.cpp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/calib/calib.cpp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/CESI3000.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/Left070.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/alg1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/art1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/art2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/art4.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/art6inv1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/art7.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/ben1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/bld1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/bok1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/bok1gaussnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/calibVideo.avi" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/cam1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/cel4.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/cln1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/cln1gaussnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/clown.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/clown2.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/clown_inv.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce3.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce4.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce5.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce5impulnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce5moregaussnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce5moreimpulnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce5moremoregaussnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fce5moremoreimpulnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fd1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/fd2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/forest.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/hnd1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/lenna.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/man8.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/manometro.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/mon1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/moo1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/munch.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/pap1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/pap3.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/pout.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/pum1dim1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/rot1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/son1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/sta2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/sta2impulnoise.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/stp1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/stp2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/tsukuba-left.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/txt3.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wal1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wdg1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wdg2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wdg3.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wdg4.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wdg5.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wom1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wom2.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/data/wrk1.bmp" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/videos/calibVideo.avi" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/videos/notCompressed.avi" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/videos/seq.avi" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/videos/seq_short.avi" afterPath="" />
+    </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -102,6 +174,9 @@
       <find>imshow</find>
     </findStrings>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/CVProject/code/main.cpp" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/CVProject/code/RichImage.h" root0="SKIP_INSPECTION" />
@@ -142,7 +217,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds">
     <option name="y" value="23" />
     <option name="width" value="1440" />
     <option name="height" value="872" />
@@ -184,6 +259,7 @@
       </profile-state>
     </entry>
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
@@ -216,21 +292,6 @@
               <item name="CLion" type="462c0819:PsiDirectoryNode" />
               <item name="CVProject" type="462c0819:PsiDirectoryNode" />
               <item name="code" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ProjectWork" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="CLion" type="462c0819:PsiDirectoryNode" />
-              <item name="Lab_Session_1" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ProjectWork" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="CLion" type="462c0819:PsiDirectoryNode" />
-              <item name="Lab_session_2" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="ProjectWork" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="CLion" type="462c0819:PsiDirectoryNode" />
-              <item name="Lab_session_3" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ProjectWork" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
@@ -316,23 +377,34 @@
       <workItem from="1520248047576" duration="3107000" />
       <workItem from="1520257633161" duration="37000" />
       <workItem from="1520268245595" duration="8518000" />
-      <workItem from="1520335410033" duration="16000" />
+      <workItem from="1520335410033" duration="260000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="64569000" />
+    <option name="totallyTimeSpent" value="64813000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="872" extended-state="1" />
+    <frame x="0" y="23" width="1440" height="872" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1874106" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23423423" sideWeight="0.49166667" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23423423" sideWeight="0.49166667" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="LuaJ" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5069444" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.49305555" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -343,7 +415,6 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
@@ -602,13 +673,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" column="64" lean-forward="false" selection-start-line="19" selection-start-column="64" selection-end-line="19" selection-end-column="64" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CVProject/code/tools.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2145">
@@ -638,6 +702,14 @@
             <element signature="e#425#1131#0" expanded="false" />
             <element signature="e#1134#1732#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" column="64" lean-forward="false" selection-start-line="19" selection-start-column="64" selection-end-line="19" selection-end-column="64" />
+          <folding />
         </state>
       </provider>
     </entry>
