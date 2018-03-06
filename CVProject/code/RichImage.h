@@ -87,21 +87,6 @@ std::vector<cv::DMatch> findModel(cv::Mat modelFeatures, cv::Mat targetFeatures,
     return goodMatches;
 }
 
-std::map<RichImage,std::vector<cv::DMatch>> findModels(std::vector<std::string> models, std::string target,
-                                                       cv::FeatureDetector* detector, cv::DescriptorMatcher* matcher, float threshold=0.7)
-{
-    std::map<RichImage, std::vector<cv::DMatch>> res;
-    for (auto m : models) {
-        //if m does not have feature computed -> compute them
-        //find m in target (findModel)
-        //for each goodmatch of model m, check if there's already another model matching better at that location
-        //if so, remove that match
-        //pray
-    }
-
-    return res;
-}
-
 
 //TODO: possibly, delete matches symmetrically, also on other models
 // that may lead to some inconsistencies, though. 2 seconds for 6 models is already nice IMO, since this operation can be carried out offline

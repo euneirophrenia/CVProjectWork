@@ -5,7 +5,7 @@
   "MODELS_PATH" : "../CVProject/models",
   "SCENES_PATH"  : "../CVProject/scenes",
 
-  "MIN_MATCHES" : 10, // to state that an object has been found, in the basic algorithm
+  "MIN_MATCHES" : 50, // to state that an object has been found, in the basic algorithm
   "THRESHOLD"  : 0.7, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
 
   "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just oto not have some random exceptions when trying to load a directory of images, you know..

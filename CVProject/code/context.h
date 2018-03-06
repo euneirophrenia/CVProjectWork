@@ -66,14 +66,14 @@ enum Algorithms {
 };
 
 //TODO: also make the public fields readonly
-//TODO: make algorithms parameters a context variable, also GRAY_SCALE / COLOR 
+//TODO: make algorithms parameters a context variable, also GRAY_SCALE / COLOR
 class Context {
 
     private:
+        std::string _json = sanifyJSON(CONFIG_PATH);
+        nlohmann::json raw_configuration = nlohmann::json::parse(_json);
+
         Context() {
-            std::ifstream inputstream;
-            std::string json = sanifyJSON(CONFIG_PATH);
-            raw_configuration = nlohmann::json::parse(json);
 
             BASE_PATH = raw_configuration["BASE_PATH"];
             auto acc=raw_configuration["ACCEPTED_EXTENSIONS"];
@@ -86,6 +86,7 @@ class Context {
             GAUSSIAN_KERNEL_SIZE = CvSize(raw_configuration["GAUSSIAN_KERNEL_SIZE"][0], raw_configuration["GAUSSIAN_KERNEL_SIZE"][1]);
             GAUSSIAN_X_SIGMA = raw_configuration["GAUSSIAN_X_SIGMA"];
             GAUSSIAN_Y_SIGMA = raw_configuration["GAUSSIAN_Y_SIGMA"];
+            GOOD_MATCH_RATIO_THRESHOLD = raw_configuration["THRESHOLD"];
         }
 
 
@@ -97,8 +98,7 @@ class Context {
         int MIN_MATCHES;
         cv::Size GAUSSIAN_KERNEL_SIZE;
         float GAUSSIAN_X_SIGMA, GAUSSIAN_Y_SIGMA;
-
-        nlohmann::basic_json raw_configuration{};
+        float GOOD_MATCH_RATIO_THRESHOLD;
 
 
         static Context& getInstance() {
@@ -110,9 +110,13 @@ class Context {
         Context(Context const&) = delete;
         void operator=(Context const&)  = delete;
 
+        /// meant to be used only in extrema ratio, it's a bit more safer to use the public fields, instead of hardcoding keys everywhere
+        //with this general scehma, the keys are hard coded only here, maybe in the future i will move towards some #define
+        nlohmann::json::value_type operator[](std::string& key) {
+            return raw_configuration[key];
+        }
+
 };
-
-
 
 
 #endif //OPENCV_CONTEXT_H
