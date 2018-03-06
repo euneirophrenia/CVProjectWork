@@ -1,0 +1,35 @@
+{
+
+  // GENERAL SETTINGS
+  "BASE_PATH"   : "../CVProject/",  //not really necessary in theory
+  "MODELS_PATH" : "../CVProject/models",
+  "SCENES_PATH"  : "../CVProject/scenes",
+
+  "MIN_MATCHES" : 10, // to state that an object has been found, in the basic algorithm
+  "THRESHOLD"  : 0.7, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
+
+  "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just oto not have some random exceptions when trying to load a directory of images, you know..
+
+  // ALGORITHMS PARAMETERS
+  "SURF_MIN_HESSIAN" : 400.0, // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
+
+  "BRISK_TRHESHOLD" : 60,
+  "BRISK_OCTAVES" : 4,
+  "BRISK_PATTERNSCALE" : 1.0,
+
+  "KDTREES_INDEX" : 5, // how many trees to use in the knnSearch with the SIFT and SURF algorithms
+  "FLANN_SEARCH_ITERATIONS" : 50, // how many times perform checks on the trees (the higher, the slower but better results)
+  "LSH_INDEX_TABLES" : 20, // for BRISK/ORB + knnSearch of the Flann matcher
+  "LSH_INDEX_KEY_SIZE" : 10, // '' '' '' ''
+  "LSH_INDEX_MULTI_PROBE_LEVEL" : 2, // '' '' '' '' ''
+
+  //parameters used in the initial blur
+  "GAUSSIAN_KERNEL_SIZE" : [4,4],
+  "GAUSSIAN_X_SIGMA" : 4,
+  "GAUSSIAN_Y_SIGMA" : 4,
+
+  // parameters used to tune each project step
+  "STEP_A_MODELS" : ["0.jpg", "1.jpg", "11.jpg", "19.jpg", "24.jpg", "26.jpg", "25.jpg"],
+  "STEP_A_SCENES" : ["e1.png", "e2.png", "e3.png", "e4.png", "e5.png"]
+
+}
