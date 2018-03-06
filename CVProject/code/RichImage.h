@@ -123,7 +123,7 @@ void strictDesciption(RichImage* model, cv::FeatureDetector* detector, cv::Descr
     for(int i=0; i < context.MODELS.size(); i++) {
         if (context.MODELS[i] != context.BASE_PATH + model->path ) {
             auto other = Images.getOrElse(context.MODELS[i], load(cv::IMREAD_GRAYSCALE));
-            othermodels.push_back(other);
+            othermodels.push_back(*other);
         }
     }
 

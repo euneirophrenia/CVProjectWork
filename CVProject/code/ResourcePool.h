@@ -23,19 +23,19 @@ public:
 
     ResourcePool<K,T>(void);
 
-    T getOrElse(K, std::function<T(K)>);
+    T* getOrElse(K, std::function<T(K)>);
 
 };
 
 
 template<class K, class T>
-inline T ResourcePool<K, T>::getOrElse(K key, std::function<T(K)> lambda) {
+inline T* ResourcePool<K, T>::getOrElse(K key, std::function<T(K)> lambda) {
 
     if (this->_map.count(key) == 0) {
         this->_map[key] = lambda(key);
     }
 
-    return this->_map[key];
+    return &this->_map[key];
 }
 
 template<class K, class T>

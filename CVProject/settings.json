@@ -24,7 +24,7 @@
   "LSH_INDEX_MULTI_PROBE_LEVEL" : 2, // '' '' '' '' ''
 
   //parameters used in the initial blur
-  "GAUSSIAN_KERNEL_SIZE" : [4,4],
+  "GAUSSIAN_KERNEL_SIZE" : [3,3], // width x height, must be odd numbers (ask opencv why)
   "GAUSSIAN_X_SIGMA" : 4,
   "GAUSSIAN_Y_SIGMA" : 4,
 

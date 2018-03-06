@@ -65,25 +65,27 @@ enum Algorithms {
     SURF
 };
 
-//TODO: in a future make it accept a config file and load configuration from there
 //TODO: also make the public fields readonly
-//TODO: make algorithms parameters a context variable, also read from file
+//TODO: make algorithms parameters a context variable, also GRAY_SCALE / COLOR 
 class Context {
 
     private:
         Context() {
             std::ifstream inputstream;
             std::string json = sanifyJSON(CONFIG_PATH);
-            auto config = nlohmann::json::parse(json);
+            raw_configuration = nlohmann::json::parse(json);
 
-            BASE_PATH = config["BASE_PATH"];
-            auto acc=config["ACCEPTED_EXTENSIONS"];
-            for (auto x : acc) {
+            BASE_PATH = raw_configuration["BASE_PATH"];
+            auto acc=raw_configuration["ACCEPTED_EXTENSIONS"];
+            for (auto& x : acc) {
                 accepted_extensions.push_back(x);
             }
-            read_directory(config["MODELS_PATH"], MODELS, fileExtensionFilter(accepted_extensions));
-            read_directory(config["SCENES_PATH"], SCENES, fileExtensionFilter(accepted_extensions));
-            MIN_MATCHES = config["MIN_MATCHES"];
+            read_directory(raw_configuration["MODELS_PATH"], MODELS, fileExtensionFilter(accepted_extensions));
+            read_directory(raw_configuration["SCENES_PATH"], SCENES, fileExtensionFilter(accepted_extensions));
+            MIN_MATCHES = raw_configuration["MIN_MATCHES"];
+            GAUSSIAN_KERNEL_SIZE = CvSize(raw_configuration["GAUSSIAN_KERNEL_SIZE"][0], raw_configuration["GAUSSIAN_KERNEL_SIZE"][1]);
+            GAUSSIAN_X_SIGMA = raw_configuration["GAUSSIAN_X_SIGMA"];
+            GAUSSIAN_Y_SIGMA = raw_configuration["GAUSSIAN_Y_SIGMA"];
         }
 
 
@@ -93,6 +95,11 @@ class Context {
         std::vector<std::string> SCENES;
         std::vector<std::string> accepted_extensions;
         int MIN_MATCHES;
+        cv::Size GAUSSIAN_KERNEL_SIZE;
+        float GAUSSIAN_X_SIGMA, GAUSSIAN_Y_SIGMA;
+
+        nlohmann::basic_json raw_configuration{};
+
 
         static Context& getInstance() {
             static Context instance;

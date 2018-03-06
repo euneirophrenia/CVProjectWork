@@ -6,17 +6,47 @@
 
 using namespace std;
 
-/**
- * This is intended to be the main access to images, so that we can cache references.
- */
+
+/// unify all models size and blur, so that more or less everything is at the same resolution
+
+void uniform(vector<RichImage*> models) {
+
+    cv::Size minimum = models[0]->image.size();
+
+    for (auto image : models) {
+        if (image->image.size().area() < minimum.area())
+            minimum = image->image.size();
+    }
+
+    /// rescale each image so that its height matches the minimum one
+    // I chose height arbitrarily, I could have chosen the width, just not both, i want to preserve proportions
+    for (auto image : models) {
+        float factor = 1.0f * image->image.size().height / minimum.height ;
+        cv::Mat rescaled;
+
+        cv::Size finalSize = CvSize(int(image->image.size().width / factor), int(image->image.size().height / factor));
+        cv::resize(image->image, rescaled, finalSize);
+
+        //todo: does it matter if i blur first and then resize? (the latter should be more conservative w.r.t. quality, imo)
+        GaussianBlur(rescaled, image->image, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
+    }
+
+}
 
 //TODO: create a ~factory to make it easy to select algorithm and parameters
 int main(int argc, char** argv) {
 
-    ///unify model sizes
+    /// unify model sizes
+    vector<RichImage*> model_references;
+    for (auto p : context.MODELS) {
+        model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
+    }
 
-    auto model = Images.getOrElse(context.BASE_PATH + "models/26.jpg", load(cv::IMREAD_GRAYSCALE));
-    auto scene = Images.getOrElse(context.BASE_PATH + "scenes/e2.png", load(cv::IMREAD_GRAYSCALE));
+    uniform(model_references);
+
+    auto model = Images.getOrElse(context.BASE_PATH + "models/0.jpg", load(cv::IMREAD_GRAYSCALE));
+    auto scene = Images.getOrElse(context.BASE_PATH + "scenes/e1.png", load(cv::IMREAD_GRAYSCALE));
+
 
     auto detector = cv::xfeatures2d::SIFT::create();
     //auto detector = cv::xfeatures2d::SURF::create(400);
@@ -36,32 +66,24 @@ int main(int argc, char** argv) {
     /*auto time = funcTime(strictDesciption, &model, detector, &matcher);
     cout << "Models processed in " << time << "ns\n";*/
 
-    cv::Mat rescaled;
-
-    //todo: make it so every image is scaled to more or less the same size (some are already "small")
-    cv::resize(model.image, rescaled, model.image.size() / 4 );
-    //todo: does it matter if i blur first and then resize? (the latter should be more conservative w.r.t. quality, imo)
-    //blur(rescaled, model.image, CvSize(4,4));
-    GaussianBlur(rescaled, model.image, CvSize(3,3), 4, 4);
-
     //todo: make it possible to create various combinations of extractor / evaluators
     //some cases may benefit from 1 algorithm keypoints and another one's evaluation
     //also, review the idea: model too close to each other may lead to the loss of some important features
     //strictDesciption(&model, detector, matcher, 0.2);
 
-    detector-> detectAndCompute(model.image, cv::Mat(), model.keypoints, model.features);
+    detector-> detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
 
-    detector->detectAndCompute(scene.image, cv::Mat(), scene.keypoints, scene.features );
-    auto matches = findModel(model.features, scene.features, matcher);
+    detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features );
+    auto matches = findModel(model->features, scene->features, matcher);
 
     cout << "Found " << matches.size() << " / " << context.MIN_MATCHES << " matches.\n";
     if (matches.size() > context.MIN_MATCHES) {
 
-        showMatches(model, scene, matches);
+        showMatches(*model, *scene, matches);
 
 
     } else {
-        cout << "Model " << model.path << " not found in " << scene.path << ".\n";
+        cout << "Model " << model->path << " not found in " << scene->path << ".\n";
     }
 
 
