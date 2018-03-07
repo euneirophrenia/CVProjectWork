@@ -61,5 +61,15 @@ std::function<RichImage(std::string)> load(int flag) {
     };
 }
 
+int sizeOfImage(RichImage* image) {
+    int res = sizeof(image->path);
+    for (auto x : image->keypoints)
+        res+=sizeof(x);
+    res+=sizeof(image->features);
+    res+=sizeof(image->image);
+
+    return res;
+}
+
 
 #endif //TOOLS_H

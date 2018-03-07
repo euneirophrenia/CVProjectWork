@@ -1,0 +1,7 @@
+.idea/
+cmake-build-debug/
+OpenCV_test/
+*.pdf
+models/
+scenes/
+

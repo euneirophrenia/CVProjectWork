@@ -2,20 +2,20 @@
 // Created by Marco DiVi on 27/02/18.
 //
 
-#include "processing/matching.h"
 #include <vector>
-
-using namespace std;
+#include "processing/matching.h"
 
 #define TEST_SCENE "scenes/e1.png"
 
-/// unify all models size and blur, so that more or less everything is at the same resolution
 
 //TODO: create a ~factory to make it easy to select algorithm and parameters
+//todo: change some scripted params with the context ones
+
+
 int main(int argc, char** argv) {
 
     /// unify model sizes
-    vector<RichImage*> model_references;
+    std::vector<RichImage*> model_references;
     for (auto p : context.MODELS) {
         model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
     }
@@ -26,35 +26,35 @@ int main(int argc, char** argv) {
     auto scene = Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
 
     auto detector = cv::xfeatures2d::SIFT::create();
-    //auto detector = cv::xfeatures2d::SURF::create(400);
-    //auto detector = cv::BRISK::create(60, 4, 1.0f);
+    //auto detector = cv::xfeatures2d::SURF::create(context["SURF_MIN_HESSIAN"]);
+    //auto detector = cv::BRISK::create((int)context["BRISK_THRESHOLD"], (int)context["BRISK_OCTAVES"], (float)context["BRISK_PATTERNSCALE"]);
     //auto detector = cv::ORB::create();
 
     /// For SIFT / SURF
-     auto indexparams = new cv::flann::KDTreeIndexParams(5);
+    auto indexparams = new cv::flann::KDTreeIndexParams(context.KDTREES_INDEX);
 
     /// FOR BRISK / ORB
-    //auto indexparams = new cv::flann::LshIndexParams(20,10,2);
+    /*auto indexparams = new cv::flann::LshIndexParams((int)context["LSH_INDEX_TABLES"],
+                          (int) context["LSH_INDEX_KEY_SIZE"], (int) context["LSH_INDEX_MULTIPROBE_LEVEL"]);*/
 
 
-    cv::flann::SearchParams* searchParams = new cv::flann::SearchParams(50);
+    cv::flann::SearchParams* searchParams = new cv::flann::SearchParams((int)context["FLANN_SEARCH_ITERATIONS"]);
     cv::FlannBasedMatcher* matcher = new cv::FlannBasedMatcher(indexparams, searchParams);
 
 
     /*auto time = funcTime(multiMatch, model_references, scene, detector, matcher);
-    cout << "First scan done in " << time << "ns\n";
+    std::cout << "First scan done in " << time << "ns\n";
 
     time = funcTime(multiMatch, model_references, scene, detector, matcher);
-    cout << "Second scan done in " << time << "ns\n";*/
+    std::cout << "Second scan done in " << time << "ns\n";*/
 
     auto multi = multiMatch(model_references, scene, detector, matcher);
 
+    std::cout <<"Scene: " << scene->path << ":\n";
     for (auto m : model_references) {
         if (multi[m].size() > context.MIN_MATCHES) {
-            showMatches(*m, *scene, multi[m]);
-        }
-        else {
-            cout << "Model " << m->path << " not found in " << scene->path << " (" << multi[m].size() << "/" <<context.MIN_MATCHES << ")\n";
+            auto at = showMatches(*m, *scene, multi[m]);
+            std::cout << "\tModel " << m->path << " found at " << at << " (" << multi[m].size() << "/" <<context.MIN_MATCHES << ")\n";
         }
     }
 
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 
 
     } else {
-        cout << "Model " << model->path << " not found in " << scene->path << ".\n";
+        std::cout << "Model " << model->path << " not found in " << scene->path << ".\n";
     }*/
 
 

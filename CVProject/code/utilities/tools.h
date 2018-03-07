@@ -2,6 +2,7 @@
 // Created by Marco DiVi on 04/03/18.
 //
 
+
 #ifndef OPENCV_UTILITIES_H
 #define OPENCV_UTILITIES_H
 
@@ -12,6 +13,7 @@
 #include <stdexcept>
 #include "opencv2/opencv.hpp"
 #include <functional>
+
 
 typedef std::chrono::high_resolution_clock::time_point TimeVar;
 

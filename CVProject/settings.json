@@ -13,7 +13,7 @@
   // ALGORITHMS PARAMETERS
   "SURF_MIN_HESSIAN" : 400.0, // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
 
-  "BRISK_TRHESHOLD" : 60,
+  "BRISK_THRESHOLD" : 60,
   "BRISK_OCTAVES" : 4,
   "BRISK_PATTERNSCALE" : 1.0,
 
@@ -21,7 +21,7 @@
   "FLANN_SEARCH_ITERATIONS" : 50, // how many times perform checks on the trees (the higher, the slower but better results)
   "LSH_INDEX_TABLES" : 20, // for BRISK/ORB + knnSearch of the Flann matcher
   "LSH_INDEX_KEY_SIZE" : 10, // '' '' '' ''
-  "LSH_INDEX_MULTI_PROBE_LEVEL" : 2, // '' '' '' '' ''
+  "LSH_INDEX_MULTIPROBE_LEVEL" : 2, // '' '' '' '' ''
 
   //parameters used in the initial blur
   "GAUSSIAN_KERNEL_SIZE" : [3,3], // width x height, must be odd numbers (ask opencv why)

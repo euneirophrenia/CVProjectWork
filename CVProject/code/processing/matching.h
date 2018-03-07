@@ -25,18 +25,14 @@ std::vector<cv::DMatch> findModel(cv::Mat& modelFeatures, cv::Mat& targetFeature
 
     for (int k = 0; k < matches.size(); k++)
     {
-        if ( (matches[k][0].distance < threshold *(matches[k][1].distance)) &&
-             ((int)matches[k].size() <= 2 && (int)matches[k].size()>0) )
-        {
-            // take the first result only if its distance is smaller than 0.6*second_best_dist
-            // that means this descriptor is ignored if the second distance is bigger or of similar
-            goodMatches.push_back( matches[k][0] );
+        if ( (matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
+            goodMatches.push_back(matches[k][0]);
         }
     }
     return goodMatches;
 }
 
-void showMatches(RichImage model, RichImage sceneImage, std::vector<cv::DMatch> good_matches, cv::Scalar withColor = cv::Scalar(0,255,0)) {
+cv::Point2d showMatches(RichImage model, RichImage sceneImage, std::vector<cv::DMatch> good_matches, cv::Scalar withColor = cv::Scalar(0,255,0)) {
     cv::Mat img_matches;
 
     Context& ctx = Context::getInstance();
@@ -76,8 +72,10 @@ void showMatches(RichImage model, RichImage sceneImage, std::vector<cv::DMatch> 
     cv::imshow(model.path + " against " + sceneImage.path, color);
 
     cv::waitKey(0);
+    return 0.5*(rect.br() + rect.tl());
 }
 
+/// unify all models size and blur, so that more or less everything is at the same resolution
 void uniform(std::vector<RichImage*> models) {
 
     cv::Size minimum = models[0]->image.size();
@@ -126,7 +124,7 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
         }
     }
 
-    /// find, for each keypoint in the image, the best match: if a keypoint matched for more than 1 model, keep the model with more matches
+    /// find, for each keypoint in the image, the best match: if a keypoint matched for more than 1 model, keep the model with more matches overall
     // maybe improve to keep the best looking match (highest ratio to the second nearest,e.g.)
     for (int keypoint = 0; keypoint < target->keypoints.size(); keypoint ++) {
         int best_model = -1;

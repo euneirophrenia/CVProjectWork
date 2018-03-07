@@ -87,6 +87,7 @@ class Context {
             GAUSSIAN_X_SIGMA = raw_configuration["GAUSSIAN_X_SIGMA"];
             GAUSSIAN_Y_SIGMA = raw_configuration["GAUSSIAN_Y_SIGMA"];
             GOOD_MATCH_RATIO_THRESHOLD = raw_configuration["THRESHOLD"];
+            KDTREES_INDEX = raw_configuration["KDTREES_INDEX"];
         }
 
 
@@ -99,6 +100,7 @@ class Context {
         cv::Size GAUSSIAN_KERNEL_SIZE;
         float GAUSSIAN_X_SIGMA, GAUSSIAN_Y_SIGMA;
         float GOOD_MATCH_RATIO_THRESHOLD;
+        int KDTREES_INDEX;
 
 
         static Context& getInstance() {
@@ -112,7 +114,11 @@ class Context {
 
         /// meant to be used only in extrema ratio, it's a bit more safer to use the public fields, instead of hardcoding keys everywhere
         //with this general scehma, the keys are hard coded only here, maybe in the future i will move towards some #define
-        nlohmann::json::value_type operator[](std::string& key) {
+        const nlohmann::json::value_type& operator[](const std::string& key) const {
+            std::cerr << "WARNING: accessing context informations by key is not something I'd advise right now. Be careful.\n";
+            if (raw_configuration.count(key) == 0) {
+                throw std::invalid_argument("Key not found " + key);
+            }
             return raw_configuration[key];
         }
 
