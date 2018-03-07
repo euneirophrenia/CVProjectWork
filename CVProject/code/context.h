@@ -16,8 +16,8 @@
 #include <iostream>
 #include <functional>
 #include "boost/filesystem.hpp"
-#include "json.hpp"
-#include "tools.h"
+#include "utilities/json.hpp"
+#include "utilities/tools.h"
 
 #define CONFIG_PATH "../CVProject/settings.json"
 

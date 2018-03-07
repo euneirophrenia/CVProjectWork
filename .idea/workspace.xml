@@ -12,12 +12,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9323b3dc-576f-4721-af49-ad2cc45a7bea" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/CVProject/code/processing/RichImage.h" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/CVProject/code/processing/matching.h" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" afterPath="" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/CVProject/code/RichImage.h" afterPath="$PROJECT_DIR$/CVProject/code/RichImage.h" />
+      <change beforePath="$PROJECT_DIR$/CVProject/code/ResourcePool.h" afterPath="$PROJECT_DIR$/CVProject/code/utilities/ResourcePool.h" />
+      <change beforePath="$PROJECT_DIR$/CVProject/code/RichImage.h" afterPath="" />
       <change beforePath="$PROJECT_DIR$/CVProject/code/context.h" afterPath="$PROJECT_DIR$/CVProject/code/context.h" />
+      <change beforePath="$PROJECT_DIR$/CVProject/code/json.hpp" afterPath="$PROJECT_DIR$/CVProject/code/utilities/json.hpp" />
       <change beforePath="$PROJECT_DIR$/CVProject/code/main.cpp" afterPath="$PROJECT_DIR$/CVProject/code/main.cpp" />
-      <change beforePath="$PROJECT_DIR$/CVProject/settings.json" afterPath="$PROJECT_DIR$/CVProject/settings.json" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/CVProject/code/main.cpp.o" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/CVProject/code/tools.h" afterPath="$PROJECT_DIR$/CVProject/code/utilities/tools.h" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/CVProject/code/main.cpp.o" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/CVProject/code/main.cpp.o" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/CXX.includecache" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/CXX.includecache" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/depend.internal" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/depend.internal" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/depend.make" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/ProjectWork.dir/depend.make" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/ProjectWork" afterPath="$PROJECT_DIR$/cmake-build-debug/ProjectWork" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -33,9 +42,23 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CVProject/code/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="267">
-              <caret line="59" column="28" lean-forward="true" selection-start-line="59" selection-start-column="28" selection-end-line="59" selection-end-column="28" />
-              <folding />
+            <state relative-caret-position="105">
+              <caret line="7" column="20" lean-forward="true" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
+              <folding>
+                <element signature="e#45#77#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="matching.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CVProject/code/processing/matching.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="5" column="85" lean-forward="false" selection-start-line="5" selection-start-column="85" selection-end-line="5" selection-end-column="85" />
+              <folding>
+                <element signature="e#203#225#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -43,21 +66,19 @@
       <file leaf-file-name="context.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CVProject/code/context.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="319">
-              <caret line="94" column="40" lean-forward="false" selection-start-line="94" selection-start-column="40" selection-end-line="94" selection-end-column="40" />
+            <state relative-caret-position="197">
+              <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
               <folding>
                 <element signature="e#182#199#0" expanded="true" />
-                <element signature="e#425#1131#0" expanded="false" />
-                <element signature="e#1134#1732#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="tools.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CVProject/code/tools.h">
+        <entry file="file://$PROJECT_DIR$/CVProject/code/utilities/tools.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="568">
+            <state relative-caret-position="2145">
               <caret line="143" column="24" lean-forward="false" selection-start-line="143" selection-start-column="24" selection-end-line="143" selection-end-column="24" />
               <folding>
                 <element signature="e#100#117#0" expanded="true" />
@@ -69,23 +90,10 @@
         </entry>
       </file>
       <file leaf-file-name="RichImage.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CVProject/code/RichImage.h">
+        <entry file="file://$PROJECT_DIR$/CVProject/code/processing/RichImage.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-51">
-              <caret line="88" column="0" lean-forward="false" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
-              <folding>
-                <element signature="e#2759#3129#0" expanded="false" />
-                <element signature="e#2759#5151#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="settings.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CVProject/settings.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="19" lean-forward="false" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+            <state relative-caret-position="645">
+              <caret line="47" column="44" lean-forward="false" selection-start-line="47" selection-start-column="44" selection-end-line="47" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -103,10 +111,10 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/CVProject/code/main.cpp" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/CVProject/code/RichImage.h" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/CVProject/code/ResourcePool.h" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/CVProject/code/processing/RichImage.h" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/CVProject/code/utilities/ResourcePool.h" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/CVProject/settings.json" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/CVProject/code/tools.h" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/CVProject/code/utilities/tools.h" root0="SKIP_INSPECTION" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -127,11 +135,13 @@
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/CVProject/code/tools.h" />
         <option value="$PROJECT_DIR$/CVProject/code/ResourcePool.h" />
-        <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/CVProject/code/RichImage.h" />
         <option value="$PROJECT_DIR$/CVProject/code/context.h" />
+        <option value="$PROJECT_DIR$/CVProject/code/RichImage.h" />
+        <option value="$PROJECT_DIR$/CVProject/code/matching.h" />
+        <option value="$PROJECT_DIR$/CVProject/code/processing/RichImage.h" />
         <option value="$PROJECT_DIR$/CVProject/settings.json" />
         <option value="$PROJECT_DIR$/CVProject/code/main.cpp" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -218,6 +228,20 @@
               <item name="CVProject" type="462c0819:PsiDirectoryNode" />
               <item name="code" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="ProjectWork" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="CLion" type="462c0819:PsiDirectoryNode" />
+              <item name="CVProject" type="462c0819:PsiDirectoryNode" />
+              <item name="code" type="462c0819:PsiDirectoryNode" />
+              <item name="processing" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ProjectWork" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="CLion" type="462c0819:PsiDirectoryNode" />
+              <item name="CVProject" type="462c0819:PsiDirectoryNode" />
+              <item name="code" type="462c0819:PsiDirectoryNode" />
+              <item name="utilities" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -229,14 +253,16 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/CVProject/code/utilities" />
+      <recent name="$PROJECT_DIR$/CVProject/code/processing" />
+      <recent name="$PROJECT_DIR$/CVProject/code" />
+      <recent name="$PROJECT_DIR$/Lab_session_2" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/Lab_session_2" />
       <recent name="$PROJECT_DIR$/Lab_session_3" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/CVProject/code" />
-      <recent name="$PROJECT_DIR$/Lab_session_2" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -299,11 +325,13 @@
       <workItem from="1520268245595" duration="8518000" />
       <workItem from="1520335410033" duration="4374000" />
       <workItem from="1520347590643" duration="5746000" />
+      <workItem from="1520358363242" duration="488000" />
+      <workItem from="1520412094885" duration="1415000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74673000" />
+    <option name="totallyTimeSpent" value="76576000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -318,14 +346,14 @@
     <frame x="0" y="23" width="1440" height="872" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18955651" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19456366" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23423423" sideWeight="0.49166667" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="LuaJ" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5069444" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.49305555" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32947233" sideWeight="0.49305555" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32947233" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -381,28 +409,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test0.cpp" />
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
@@ -482,11 +488,6 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/models/24.jpg">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CVProject/models/26.jpg">
       <provider selected="true" editor-type-id="images">
         <state />
@@ -522,15 +523,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="12" lean-forward="false" selection-start-line="2" selection-start-column="12" selection-end-line="2" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/code/json.hpp">
+    <entry file="file://$PROJECT_DIR$/CVProject/code/utilities/json.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="250">
           <caret line="15474" column="22" lean-forward="false" selection-start-line="15474" selection-start-column="22" selection-end-line="15474" selection-end-column="22" />
@@ -548,9 +541,26 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/code/tools.h">
+    <entry file="file://$PROJECT_DIR$/CVProject/code/utilities/ResourcePool.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="568">
+        <state relative-caret-position="178">
+          <caret line="25" column="6" lean-forward="false" selection-start-line="25" selection-start-column="6" selection-end-line="25" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CVProject/models/1.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CVProject/models/11.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CVProject/code/utilities/tools.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2145">
           <caret line="143" column="24" lean-forward="false" selection-start-line="143" selection-start-column="24" selection-end-line="143" selection-end-column="24" />
           <folding>
             <element signature="e#100#117#0" expanded="true" />
@@ -562,58 +572,75 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CVProject/code/context.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="319">
-          <caret line="94" column="40" lean-forward="false" selection-start-line="94" selection-start-column="40" selection-end-line="94" selection-end-column="40" />
+        <state relative-caret-position="197">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
           <folding>
             <element signature="e#182#199#0" expanded="true" />
-            <element signature="e#425#1131#0" expanded="false" />
-            <element signature="e#1134#1732#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/code/ResourcePool.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="25" column="6" lean-forward="false" selection-start-line="25" selection-start-column="6" selection-end-line="25" selection-end-column="6" />
-          <folding />
-        </state>
+    <entry file="file://$PROJECT_DIR$/CVProject/models/24.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/code/RichImage.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-51">
-          <caret line="88" column="0" lean-forward="false" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
-          <folding>
-            <element signature="e#2759#3129#0" expanded="false" />
-            <element signature="e#2759#5151#0" expanded="false" />
-          </folding>
-        </state>
+    <entry file="file://$PROJECT_DIR$/CVProject/models/13.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/models/1.jpg">
+    <entry file="file://$PROJECT_DIR$/CVProject/scenes/h2.jpg">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CVProject/scenes/h1.jpg">
       <provider selected="true" editor-type-id="images">
         <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CVProject/settings.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="19" lean-forward="false" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+        <state relative-caret-position="301">
+          <caret line="26" column="29" lean-forward="false" selection-start-line="26" selection-start-column="29" selection-end-line="26" selection-end-column="29" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CVProject/models/11.jpg">
-      <provider selected="true" editor-type-id="images">
-        <state />
+    <entry file="file://$PROJECT_DIR$/CVProject/code/processing/RichImage.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="645">
+          <caret line="47" column="44" lean-forward="false" selection-start-line="47" selection-start-column="44" selection-end-line="47" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CVProject/code/processing/matching.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="85" lean-forward="false" selection-start-line="5" selection-start-column="85" selection-end-line="5" selection-end-column="85" />
+          <folding>
+            <element signature="e#203#225#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="12" lean-forward="false" selection-start-line="2" selection-start-column="12" selection-end-line="2" selection-end-column="12" />
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CVProject/code/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="267">
-          <caret line="59" column="28" lean-forward="true" selection-start-line="59" selection-start-column="28" selection-end-line="59" selection-end-column="28" />
-          <folding />
+        <state relative-caret-position="105">
+          <caret line="7" column="20" lean-forward="true" selection-start-line="7" selection-start-column="20" selection-end-line="7" selection-end-column="20" />
+          <folding>
+            <element signature="e#45#77#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

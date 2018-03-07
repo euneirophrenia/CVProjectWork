@@ -6,22 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/ResourcePool.h
-map
--
-functional
--
-
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/RichImage.h
-ResourcePool.h
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/ResourcePool.h
-tools.h
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/tools.h
-context.h
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/context.h
-opencv2/xfeatures2d/nonfree.hpp
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/opencv2/xfeatures2d/nonfree.hpp
-
 /Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/context.h
 string
 -
@@ -37,12 +21,42 @@ functional
 -
 boost/filesystem.hpp
 /Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/boost/filesystem.hpp
-json.hpp
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/json.hpp
-tools.h
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/tools.h
+utilities/json.hpp
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/json.hpp
+utilities/tools.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/tools.h
 
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/json.hpp
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/main.cpp
+processing/matching.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/processing/matching.h
+vector
+-
+
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/processing/RichImage.h
+../utilities/ResourcePool.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/ResourcePool.h
+../utilities/tools.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/tools.h
+../context.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/context.h
+opencv2/xfeatures2d/nonfree.hpp
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/processing/opencv2/xfeatures2d/nonfree.hpp
+
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/processing/matching.h
+RichImage.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/processing/RichImage.h
+vector
+-
+string
+-
+
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/ResourcePool.h
+map
+-
+functional
+-
+
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/json.hpp
 algorithm
 -
 cassert
@@ -318,11 +332,7 @@ vector
 utility
 -
 
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/main.cpp
-RichImage.h
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/RichImage.h
-
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/tools.h
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/tools.h
 chrono
 -
 utility
@@ -334,7 +344,7 @@ iostream
 stdexcept
 -
 opencv2/opencv.hpp
-/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/opencv2/opencv.hpp
+/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/CLion/CVProject/code/utilities/opencv2/opencv.hpp
 functional
 -
 
