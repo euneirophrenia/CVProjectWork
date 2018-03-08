@@ -13,6 +13,8 @@
 #include <vector>
 #include <string>
 
+
+
 //todo: possibly move the threshold to the context
 std::vector<cv::DMatch> findModel(cv::Mat& modelFeatures, cv::Mat& targetFeatures, cv::DescriptorMatcher* matcher,
                                   float threshold = 0.7) {
@@ -100,13 +102,12 @@ void uniform(std::vector<RichImage*> models) {
 
 }
 
-std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*> models, RichImage* target, cv::FeatureDetector* detector,
-                                                         cv::DescriptorMatcher* matcher){
+std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*> models, RichImage* target, Algorithm algo){
 
     std::map<RichImage*, std::vector<cv::DMatch>> res;
 
     if (target->features.empty() || target->keypoints.empty())
-        detector->detectAndCompute(target->image, cv::Mat(), target->keypoints, target->features );
+        algo.detector->detectAndCompute(target->image, cv::Mat(), target->keypoints, target->features );
 
     u_long totalMatches[models.size()];
 
@@ -115,9 +116,9 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     for (int i=0; i<models.size(); i++) {
         auto model = models[i];
         if (model->keypoints.empty() || model->features.empty())
-            detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features );
+            algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features );
 
-        std::vector<cv::DMatch> localmatches = findModel(model->features, target->features, matcher, context.GOOD_MATCH_RATIO_THRESHOLD);
+        std::vector<cv::DMatch> localmatches = findModel(model->features, target->features, algo.matcher, context.GOOD_MATCH_RATIO_THRESHOLD);
         totalMatches[i] = localmatches.size();
         for (auto match : localmatches) {
             matches[match.trainIdx][i] = match;
@@ -141,6 +142,37 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
 
     return res;
 }
+
+//todo:: move away from the map, can't be used with cv::Point, need to find other better structures
+/*cv::Mat GHTmultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+    std::vector<std::map<cv::Point2d, int>> resmap;
+    cv::Mat res = cv::Mat(scene->image.rows, scene->image.cols, CV_32SC1);
+
+    if (scene->keypoints.empty())
+        algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
+
+    for (int i=0; i<models.size(); i++){
+        std::map<cv::Point2d, int> modelmap;
+        resmap.push_back(modelmap);
+
+        std::vector<cv::DMatch> matches = findModel(models[i]->features, scene->features, algo.matcher, context["THRESHOLD"]);
+
+        for (auto match : matches) {
+            double scale = scene->keypoints[match.queryIdx].size / models[i]->keypoints[match.trainIdx].size;
+            cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
+            cv::Point2d estimated_bary;
+            estimated_bary.x = scenept.x + scale * (*models[i]->houghModel)[i][0];
+            estimated_bary.y = scenept.y + scale * (*models[i]->houghModel)[i][1];
+            if (resmap[i].count(estimated_bary) == 0)
+                resmap[i][estimated_bary] = 0;
+            resmap[i][estimated_bary] += 1;
+        }
+    }
+
+    <populate correctly the result without giving away any info>
+
+    return res;
+}*/
 
 
 

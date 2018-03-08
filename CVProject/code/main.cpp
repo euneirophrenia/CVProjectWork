@@ -2,10 +2,9 @@
 // Created by Marco DiVi on 27/02/18.
 //
 
-#include <vector>
 #include "processing/matching.h"
 
-#define TEST_SCENE "scenes/e1.png"
+#define TEST_SCENE "scenes/h1.jpg"
 
 
 //TODO: create a ~factory to make it easy to select algorithm and parameters
@@ -19,6 +18,7 @@ int main(int argc, char** argv) {
     for (auto p : context.MODELS) {
         model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
     }
+
 
     uniform(model_references);
 
@@ -41,6 +41,8 @@ int main(int argc, char** argv) {
     cv::flann::SearchParams* searchParams = new cv::flann::SearchParams((int)context["FLANN_SEARCH_ITERATIONS"]);
     cv::FlannBasedMatcher* matcher = new cv::FlannBasedMatcher(indexparams, searchParams);
 
+    Algorithm* alg = new Algorithm(detector, matcher);
+
 
     /*auto time = funcTime(multiMatch, model_references, scene, detector, matcher);
     std::cout << "First scan done in " << time << "ns\n";
@@ -48,7 +50,10 @@ int main(int argc, char** argv) {
     time = funcTime(multiMatch, model_references, scene, detector, matcher);
     std::cout << "Second scan done in " << time << "ns\n";*/
 
-    auto multi = multiMatch(model_references, scene, detector, matcher);
+    auto multi = multiMatch(model_references, scene, *alg);
+
+    //todo:: try to match from the image to the model, instead of the contrary, since there are many instances of one model
+
 
     std::cout <<"Scene: " << scene->path << ":\n";
     for (auto m : model_references) {
@@ -58,20 +63,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    /*detector-> detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
 
-    detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features );
-    auto matches = findModel(model->features, scene->features, matcher);
+    //auto multi = GHTmultiMatch(model_references, scene, *alg);
 
-    cout << "Found " << matches.size() << " / " << context.MIN_MATCHES << " matches.\n";
-    if (matches.size() > context.MIN_MATCHES) {
-
-        showMatches(*model, *scene, matches);
-
-
-    } else {
-        std::cout << "Model " << model->path << " not found in " << scene->path << ".\n";
-    }*/
 
 
 }

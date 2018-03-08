@@ -28,8 +28,7 @@
   "GAUSSIAN_X_SIGMA" : 4,
   "GAUSSIAN_Y_SIGMA" : 4,
 
-  // parameters used to tune each project step
-  "STEP_A_MODELS" : ["0.jpg", "1.jpg", "11.jpg", "19.jpg", "24.jpg", "26.jpg", "25.jpg"],
-  "STEP_A_SCENES" : ["e1.png", "e2.png", "e3.png", "e4.png", "e5.png"]
+  "MIN_HOUGH_VOTES" : 10
+
 
 }

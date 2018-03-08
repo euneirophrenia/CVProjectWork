@@ -4,7 +4,6 @@ project(ProjectWork)
 
 
 find_package( OpenCV REQUIRED )
-find_package( Boost 1.66.0 COMPONENTS filesystem REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -17,8 +16,8 @@ file(GLOB SOURCE_FILES
 
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-include_directories(${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 
