@@ -135,7 +135,7 @@ class Context {
         /// meant to be used only in extrema ratio, it's a bit more safer to use the public fields, instead of hardcoding keys everywhere
         //with this general scehma, the keys are hard coded only here, maybe in the future i will move towards some #define
         const nlohmann::json::value_type& operator[](const std::string& key) const {
-            std::cerr << "WARNING: accessing context informations by key is not something I'd advise right now. Be careful.\n";
+            //std::cerr << "WARNING: accessing context informations by key is not something I'd advise right now. Be careful.\n";
             if (raw_configuration.count(key) == 0) {
                 throw std::invalid_argument("Key not found " + key);
             }

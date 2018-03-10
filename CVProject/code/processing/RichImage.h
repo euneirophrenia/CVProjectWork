@@ -27,23 +27,6 @@ struct RichImage {
     cv::Mat features;
     HoughModel* houghModel;
 
-    private:
-        void buildHoughModel() {
-            std::vector<cv::Vec2d> res;
-            ///find barycenter
-            cv::Point2f bary;
-            for (auto kp : this->keypoints)
-                bary += kp.pt;
-            bary.x /= this->keypoints.size();
-            bary.y /= this->keypoints.size();
-
-            for (auto kp : this->keypoints) {
-                res.push_back(cv::Vec2d(kp.pt.x - bary.x, kp.pt.y - bary.y));
-            }
-           this->houghModel = new HoughModel(res);
-        }
-
-
     public:
         operator cv::Mat() const {
             return image;
@@ -58,16 +41,29 @@ struct RichImage {
             cv::waitKey(waitkey);
         }
 
-        explicit RichImage(std::string path, cv::FeatureDetector detector, int mode = cv::IMREAD_GRAYSCALE) {
+        explicit RichImage(std::string path, cv::Feature2D* detector, int mode = cv::IMREAD_GRAYSCALE) {
             this->path = path;
             this->image = cv::imread(path, mode);
-
-            detector.detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
-            buildHoughModel();
+            detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
         }
 
         /// backwards compatibility, I initially didn't account for
         explicit RichImage() {}
+
+        void buildHoughModel() {
+            std::vector<cv::Vec2d> res;
+            ///find barycenter
+            cv::Point2f bary;
+            for (auto kp : this->keypoints)
+                bary += kp.pt / kp.size;
+            bary.x /= this->keypoints.size();
+            bary.y /= this->keypoints.size();
+
+            for (auto kp : this->keypoints) {
+                res.push_back(cv::Vec2d(kp.pt.x - bary.x, kp.pt.y - bary.y));
+            }
+            this->houghModel = new HoughModel(res);
+    }
 
 };
 
@@ -92,15 +88,14 @@ std::function<RichImage(std::string)> load(int flag) {
     };
 }
 
-std::function<RichImage(std::string)> init(cv::FeatureDetector detector, int flag) {
-    return [&](std::string filename) {
-        RichImage res(filename, detector, flag);
+std::function<RichImage(std::string)> init(cv::Ptr<cv::Feature2D> detector, int flag) {
+    return [&detector, flag](std::string filename) {
+        RichImage* res = new RichImage(filename, detector, flag);
 
-        if (res.image.empty()){
+        if (res->image.empty()){
             throw std::invalid_argument("Image not loaded properly " + filename);
         }
-        return res;
-
+        return *res;
     };
 }
 

@@ -22,7 +22,6 @@ std::vector<cv::DMatch> findModel(cv::Mat& modelFeatures, cv::Mat& targetFeature
     std::vector<std::vector<cv::DMatch>> matches;
     matcher->knnMatch(modelFeatures, targetFeatures, matches, 2);
 
-
     std::vector<cv::DMatch> goodMatches;
 
     for (int k = 0; k < matches.size(); k++)
@@ -143,17 +142,17 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     return res;
 }
 
-//todo:: move away from the map, can't be used with cv::Point, need to find other better structures
-/*cv::Mat GHTmultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
-    std::vector<std::map<cv::Point2d, int>> resmap;
-    cv::Mat res = cv::Mat(scene->image.rows, scene->image.cols, CV_32SC1);
+std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+
+    std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> res;
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
 
     for (int i=0; i<models.size(); i++){
-        std::map<cv::Point2d, int> modelmap;
-        resmap.push_back(modelmap);
+
+        std::vector<cv::DMatch> votes[scene->image.rows][scene->image.cols];
+
 
         std::vector<cv::DMatch> matches = findModel(models[i]->features, scene->features, algo.matcher, context["THRESHOLD"]);
 
@@ -161,19 +160,52 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
             double scale = scene->keypoints[match.queryIdx].size / models[i]->keypoints[match.trainIdx].size;
             cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
             cv::Point2d estimated_bary;
-            estimated_bary.x = scenept.x + scale * (*models[i]->houghModel)[i][0];
-            estimated_bary.y = scenept.y + scale * (*models[i]->houghModel)[i][1];
-            if (resmap[i].count(estimated_bary) == 0)
-                resmap[i][estimated_bary] = 0;
-            resmap[i][estimated_bary] += 1;
+            estimated_bary.x = scenept.x + scale * (*models[i]->houghModel)[match.trainIdx][0];
+            estimated_bary.y = scenept.y + scale * (*models[i]->houghModel)[match.trainIdx][1];
+
+            votes[(int)estimated_bary.x][(int)estimated_bary.y].push_back(match);
+        }
+
+        res[models[i]] = std::vector<std::vector<cv::DMatch>>();
+
+        for (int j=0; j< scene->image.rows; j++) {
+            for (int k =0; k < scene->image.cols; k++) {
+                if (votes[j][k].size() > context["MIN_HOUGH_VOTES"])
+                    res[models[i]].push_back(votes[j][k]);
+            }
         }
     }
 
-    <populate correctly the result without giving away any info>
+    return res;
+}
+
+//todo:: fix memory, the houghModel probably gets built wrongly, look into that
+cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
+
+    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32SC1);
+
+    model->buildHoughModel();
+
+    if (scene->keypoints.empty())
+        algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
+
+    if (model->keypoints.empty())
+        algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
+
+    std::vector<cv::DMatch> matches = findModel(model->features, scene->features, algo.matcher, context["THRESHOLD"]);
+
+    for (auto match : matches) {
+        double scale = scene->keypoints[match.queryIdx].size / model->keypoints[match.trainIdx].size;
+        cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
+        cv::Point2d estimated_bary;
+        estimated_bary.x = scenept.x + scale * (*model->houghModel)[match.trainIdx][0];
+        estimated_bary.y = scenept.y + scale * (*model->houghModel)[match.trainIdx][1];
+
+        res.at<int>(estimated_bary) += 1;
+    }
 
     return res;
-}*/
-
+}
 
 
 #endif //PROJECTWORK_MATCHING_H
