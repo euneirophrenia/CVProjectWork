@@ -16,8 +16,8 @@
 
 
 //todo: possibly move the threshold to the context
-std::vector<cv::DMatch> findModel(cv::Mat& modelFeatures, cv::Mat& targetFeatures, cv::DescriptorMatcher* matcher,
-                                  float threshold = 0.7) {
+std::vector<cv::DMatch> findKnn(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher *matcher,
+                                float threshold = 0.7) {
 
     std::vector<std::vector<cv::DMatch>> matches;
     matcher->knnMatch(modelFeatures, targetFeatures, matches, 2);
@@ -29,6 +29,19 @@ std::vector<cv::DMatch> findModel(cv::Mat& modelFeatures, cv::Mat& targetFeature
         if ( (matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
             goodMatches.push_back(matches[k][0]);
         }
+    }
+    return goodMatches;
+}
+
+std::vector<cv::DMatch> findRadius(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher * matcher, float distance){
+    std::vector<std::vector<cv::DMatch>> matches;
+    matcher->radiusMatch(modelFeatures, targetFeatures, matches, distance);
+
+    std::vector<cv::DMatch> goodMatches;
+
+    for (int k = 0; k < matches.size(); k++) {
+        if (matches[k].size() > 0)
+            goodMatches.push_back(matches[k][0]);
     }
     return goodMatches;
 }
@@ -77,7 +90,7 @@ cv::Point2d showMatches(RichImage model, RichImage sceneImage, std::vector<cv::D
 }
 
 /// unify all models size and blur, so that more or less everything is at the same resolution
-void uniform(std::vector<RichImage*> models) {
+void uniform(std::vector<RichImage*> models, bool andBlur=false) {
 
     cv::Size minimum = models[0]->image.size();
 
@@ -95,8 +108,12 @@ void uniform(std::vector<RichImage*> models) {
         cv::Size finalSize = CvSize(int(image->image.size().width / factor), int(image->image.size().height / factor));
         cv::resize(image->image, rescaled, finalSize);
 
+        if (andBlur)
         //todo: does it matter if i blur first and then resize? (the latter should be more conservative w.r.t. quality, imo)
-        GaussianBlur(rescaled, image->image, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
+            GaussianBlur(rescaled, image->image, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
+        else {
+            image->image = rescaled;
+        }
     }
 
 }
@@ -108,6 +125,7 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     if (target->features.empty() || target->keypoints.empty())
         algo.detector->detectAndCompute(target->image, cv::Mat(), target->keypoints, target->features );
 
+
     u_long totalMatches[models.size()];
 
     /// find for each model their respective matches
@@ -115,9 +133,10 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     for (int i=0; i<models.size(); i++) {
         auto model = models[i];
         if (model->keypoints.empty() || model->features.empty())
-            algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features );
+            algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
 
-        std::vector<cv::DMatch> localmatches = findModel(model->features, target->features, algo.matcher, context.GOOD_MATCH_RATIO_THRESHOLD);
+        std::vector<cv::DMatch> localmatches = findKnn(model->features, target->features, algo.matcher,
+                                                       context.GOOD_MATCH_RATIO_THRESHOLD);
         totalMatches[i] = localmatches.size();
         for (auto match : localmatches) {
             matches[match.trainIdx][i] = match;
@@ -154,14 +173,15 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
         std::vector<cv::DMatch> votes[scene->image.rows][scene->image.cols];
 
 
-        std::vector<cv::DMatch> matches = findModel(models[i]->features, scene->features, algo.matcher, context["THRESHOLD"]);
+        std::vector<cv::DMatch> matches = findKnn(models[i]->features, scene->features, algo.matcher,
+                                                  context["THRESHOLD"]);
 
         for (auto match : matches) {
             double scale = scene->keypoints[match.queryIdx].size / models[i]->keypoints[match.trainIdx].size;
             cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
             cv::Point2d estimated_bary;
-            estimated_bary.x = scenept.x + scale * (*models[i]->houghModel)[match.trainIdx][0];
-            estimated_bary.y = scenept.y + scale * (*models[i]->houghModel)[match.trainIdx][1];
+            estimated_bary.x = scenept.x - scale * (*models[i]->houghModel)[match.trainIdx][0];
+            estimated_bary.y = scenept.y - scale * (*models[i]->houghModel)[match.trainIdx][1];
 
             votes[(int)estimated_bary.x][(int)estimated_bary.y].push_back(match);
         }
@@ -179,12 +199,12 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
     return res;
 }
 
-//todo:: fix memory, the houghModel probably gets built wrongly, look into that
+//todo:: the houghModel probably gets built wrongly, look into that
+// also, find a way to collapse very close votes
 cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32SC1);
-
-    model->buildHoughModel();
+    int patchsize = 1;
+    cv::Mat res = cv::Mat::zeros(scene->image.rows / patchsize, scene->image.cols / patchsize, CV_32SC1);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -192,17 +212,45 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
     if (model->keypoints.empty())
         algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
 
-    std::vector<cv::DMatch> matches = findModel(model->features, scene->features, algo.matcher, context["THRESHOLD"]);
+
+    std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo.matcher, context["THRESHOLD"]);
+
+    std::ofstream data;
+    data.open("/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/Python/ProjectWork/data.txt", std::ios::out);
 
     for (auto match : matches) {
-        double scale = scene->keypoints[match.queryIdx].size / model->keypoints[match.trainIdx].size;
+        double scale = model->keypoints[match.trainIdx].size / scene->keypoints[match.queryIdx].size ;
+        double angle = -scene->keypoints[match.queryIdx].angle + model->keypoints[match.trainIdx].angle;
         cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
         cv::Point2d estimated_bary;
-        estimated_bary.x = scenept.x + scale * (*model->houghModel)[match.trainIdx][0];
-        estimated_bary.y = scenept.y + scale * (*model->houghModel)[match.trainIdx][1];
+        cv::Vec2d houghmodel = (*model->houghModel)[match.trainIdx];
 
+        /*std::cout << "Size :" << model->keypoints[match.trainIdx].size << "/" << scene->keypoints[match.queryIdx].size << "\n";
+        std::cout << "Angle :" << model->keypoints[match.trainIdx].angle << "/" << scene->keypoints[match.queryIdx].angle << "\n";
+        std::cout << "Response :" << model->keypoints[match.trainIdx].response << "/" << scene->keypoints[match.queryIdx].response << "\n";
+        std::cout << "------------\n";*/
+
+        houghmodel = rotate(houghmodel, angle);
+
+        estimated_bary.x = (scenept.x +  scale * houghmodel[0])/patchsize;
+        estimated_bary.y = (scenept.y +  scale * houghmodel[1])/patchsize;
+
+        data << estimated_bary.x << "," << estimated_bary.y << "\n";
+
+        if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > res.cols || estimated_bary.y > res.rows) {
+            std::cerr << "Ignoring " << estimated_bary << "\n";
+            continue;
+        }
         res.at<int>(estimated_bary) += 1;
     }
+    data.close();
+
+    //todo:: blob analysis, merge the ~connected estimated barys and provide only one (maybe with a measure of connectiveness
+    //filter here spurious matches by either:
+    //      - setting a threshold
+    //      - tuning search parameters to be strict -> may break connectiveness
+
+    //todo:: finally, since we're basically ignoring perfect matches, test with less powerful detectors, to speed up processing
 
     return res;
 }

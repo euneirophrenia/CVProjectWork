@@ -19,6 +19,7 @@ public:
     explicit HoughModel(std::vector<cv::Vec2d> m){
         this->model = std::vector<cv::Vec2d>(m);
     }
+
 };
 
 #endif //PROJECTWORK_GHT_H

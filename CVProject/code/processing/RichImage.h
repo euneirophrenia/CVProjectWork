@@ -27,7 +27,33 @@ struct RichImage {
     cv::Mat features;
     HoughModel* houghModel;
 
+    void buildHoughModel() {
+        std::vector<cv::Vec2d> res;
+        ///find barycenter
+        cv::Point2f bary;
+        for (auto kp : this->keypoints) {
+            bary += kp.pt;
+        }
+        bary.x /= this->keypoints.size();
+        bary.y /= this->keypoints.size();
+
+        for (auto kp : this->keypoints) {
+            cv::Vec2d actual;
+            actual = cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y); //rotate(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y), -kp.angle);
+            res.push_back(actual);
+        }
+        this->houghModel = new HoughModel(res);
+    }
+
     public:
+
+        void build(Algorithm* algo, bool andBuildHough = false){
+            algo->detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
+            if (andBuildHough)
+                buildHoughModel();
+
+        }
+
         operator cv::Mat() const {
             return image;
         }
@@ -41,29 +67,14 @@ struct RichImage {
             cv::waitKey(waitkey);
         }
 
-        explicit RichImage(std::string path, cv::Feature2D* detector, int mode = cv::IMREAD_GRAYSCALE) {
+        explicit RichImage(std::string path, int mode = cv::IMREAD_GRAYSCALE) {
             this->path = path;
             this->image = cv::imread(path, mode);
-            detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
         }
 
         /// backwards compatibility, I initially didn't account for
         explicit RichImage() {}
 
-        void buildHoughModel() {
-            std::vector<cv::Vec2d> res;
-            ///find barycenter
-            cv::Point2f bary;
-            for (auto kp : this->keypoints)
-                bary += kp.pt / kp.size;
-            bary.x /= this->keypoints.size();
-            bary.y /= this->keypoints.size();
-
-            for (auto kp : this->keypoints) {
-                res.push_back(cv::Vec2d(kp.pt.x - bary.x, kp.pt.y - bary.y));
-            }
-            this->houghModel = new HoughModel(res);
-    }
 
 };
 
@@ -75,27 +86,16 @@ struct RichImage {
 ResourcePool<std::string, RichImage> Images;
 
 
-std::function<RichImage(std::string)> load(int flag) {
+std::function<RichImage*(std::string)> load(int flag) {
     return [=](std::string filename) {
-        RichImage res;
-        res.image = cv::imread(filename, flag);
-        if (res.image.empty()){
-            throw std::invalid_argument("Image not loaded properly " + filename);
-        }
-        res.path = filename;
-        return res;
-
-    };
-}
-
-std::function<RichImage(std::string)> init(cv::Ptr<cv::Feature2D> detector, int flag) {
-    return [&detector, flag](std::string filename) {
-        RichImage* res = new RichImage(filename, detector, flag);
-
+        RichImage* res = new RichImage();
+        res->image = cv::imread(filename, flag);
         if (res->image.empty()){
             throw std::invalid_argument("Image not loaded properly " + filename);
         }
-        return *res;
+        res->path = filename;
+        return res;
+
     };
 }
 

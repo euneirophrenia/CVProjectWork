@@ -13,7 +13,9 @@
 #include <stdexcept>
 #include "opencv2/opencv.hpp"
 #include <functional>
+#include <math.h>
 
+#define PI 3.14159265
 
 typedef std::chrono::high_resolution_clock::time_point TimeVar;
 
@@ -144,6 +146,19 @@ std::string sanifyJSON(std::string filename) {
     res+=c;
 
     inputstream.close();
+    return res;
+}
+
+
+cv::Vec2d rotate(cv::Vec2d src, double angle) {
+
+    auto res = cv::Vec2d(src);
+
+    double radians = angle * PI/ 180;
+
+    res[0] = src[0] * cos(radians) - src[1] * sin(radians);
+    res[1] = src[0] * sin(radians) + src[1] * cos(radians);
+
     return res;
 }
 

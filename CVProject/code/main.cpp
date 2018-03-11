@@ -36,14 +36,21 @@ int main(int argc, char** argv) {
     /// unify model sizes
     std::vector<RichImage*> model_references;
     for (auto p : context.MODELS) {
-        model_references.push_back(Images.getOrElse(p, init(detector, cv::IMREAD_GRAYSCALE)));
+        model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
     }
 
 
-    uniform(model_references);
+    uniform(model_references, true);
+
+    for (auto m : model_references){
+        m->build(alg, true);
+    }
 
     //auto model = Images.getOrElse(context.BASE_PATH + "models/0.jpg", load(cv::IMREAD_GRAYSCALE));
-    auto scene = Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
+    auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
+    scene -> build(alg);
+
+    std::cout <<"Scene: " << scene->path << ":\n";
 
     /*auto time = funcTime(multiMatch, model_references, scene, detector, matcher);
     std::cout << "First scan done in " << time << "ns\n";
@@ -66,7 +73,7 @@ int main(int argc, char** argv) {
 
     /*auto multi = GHTmultiMatch(model_references, scene, *alg);
 
-    std::cout <<"Scene: " << scene->path << ":\n";
+
 
     for(auto m: model_references){
         for (auto occurrence : multi[m]){
@@ -77,7 +84,8 @@ int main(int argc, char** argv) {
         }
     }*/
 
-    auto ghtmatch = GHTMatch(model_references[0], scene, *alg);
+    auto ghtmatch = GHTMatch(model_references[1], scene, *alg);
+    //std::cout <<"Looking for " << model_references[1]->path << "\n";
 
     for (int i=0; i < ghtmatch.rows; i++) {
         for (int j=0; j< ghtmatch.cols; j++) {
@@ -86,6 +94,5 @@ int main(int argc, char** argv) {
             }
         }
     }
-
 
 }
