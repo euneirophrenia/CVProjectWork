@@ -15,11 +15,21 @@
 #include <dirent.h>
 #include <iostream>
 #include <functional>
-#include "boost/filesystem.hpp"
-#include "json.hpp"
-#include "tools.h"
+
+#include "utilities/json.hpp"
+#include "utilities/tools.h"
 
 #define CONFIG_PATH "../CVProject/settings.json"
+
+struct Algorithm {
+    cv::DescriptorMatcher* matcher;
+    cv::FeatureDetector* detector;
+
+    explicit Algorithm(cv::FeatureDetector* detector, cv::DescriptorMatcher* matcher){
+        this->matcher = matcher;
+        this->detector = detector;
+    }
+};
 
 /**
  * Populates the provided vector with the names of the files in the provided directory matching the given criterium.
@@ -39,6 +49,16 @@ void read_directory(const std::string& name, std::vector<std::string> & v, std::
 }
 
 
+std::string extension(std::string& filename) {
+    auto dot = filename.find_last_of('.');
+    if (dot == std::string::npos) {
+        throw std::invalid_argument("No extension found");
+    }
+
+    return filename.substr(dot , filename.size());
+
+}
+
 /**
  * A function that returns a lambda (filename) => boolean, that returns true only if the "extension" of the provided file name
  * matches one of the accepted ones.
@@ -48,9 +68,9 @@ void read_directory(const std::string& name, std::vector<std::string> & v, std::
 std::function<bool(std::string)> fileExtensionFilter(std::vector<std::string> accepted) {
 
     return [&](std::string filename) {
-        auto extension = boost::filesystem::extension(filename);
+        auto extension_ = extension(filename);
         for (auto& acc : accepted) {
-            if (acc == extension)
+            if (acc == extension_)
                 return true;
         }
         return false;
@@ -58,12 +78,12 @@ std::function<bool(std::string)> fileExtensionFilter(std::vector<std::string> ac
 
 }
 
-enum Algorithms {
+/*enum Algorithms {
     BRISK = 0,
     ORB,
     SIFT,
     SURF
-};
+};*/
 
 //TODO: also make the public fields readonly
 //TODO: make algorithms parameters a context variable, also GRAY_SCALE / COLOR
@@ -87,6 +107,7 @@ class Context {
             GAUSSIAN_X_SIGMA = raw_configuration["GAUSSIAN_X_SIGMA"];
             GAUSSIAN_Y_SIGMA = raw_configuration["GAUSSIAN_Y_SIGMA"];
             GOOD_MATCH_RATIO_THRESHOLD = raw_configuration["THRESHOLD"];
+            KDTREES_INDEX = raw_configuration["KDTREES_INDEX"];
         }
 
 
@@ -99,6 +120,7 @@ class Context {
         cv::Size GAUSSIAN_KERNEL_SIZE;
         float GAUSSIAN_X_SIGMA, GAUSSIAN_Y_SIGMA;
         float GOOD_MATCH_RATIO_THRESHOLD;
+        int KDTREES_INDEX;
 
 
         static Context& getInstance() {
@@ -112,7 +134,11 @@ class Context {
 
         /// meant to be used only in extrema ratio, it's a bit more safer to use the public fields, instead of hardcoding keys everywhere
         //with this general scehma, the keys are hard coded only here, maybe in the future i will move towards some #define
-        nlohmann::json::value_type operator[](std::string& key) {
+        const nlohmann::json::value_type& operator[](const std::string& key) const {
+            //std::cerr << "WARNING: accessing context informations by key is not something I'd advise right now. Be careful.\n";
+            if (raw_configuration.count(key) == 0) {
+                throw std::invalid_argument("Key not found " + key);
+            }
             return raw_configuration[key];
         }
 
