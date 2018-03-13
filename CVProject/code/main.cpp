@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
     cv::flann::SearchParams* searchParams = new cv::flann::SearchParams((int)context["FLANN_SEARCH_ITERATIONS"]);
     cv::FlannBasedMatcher* matcher = new cv::FlannBasedMatcher(indexparams, searchParams);
 
+
     Algorithm* alg = new Algorithm(detector, matcher);
 
     /// unify model sizes
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
     //auto model = Images.getOrElse(context.BASE_PATH + "models/0.jpg", load(cv::IMREAD_GRAYSCALE));
     auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
     scene -> build(alg);
+
 
     std::cout <<"Scene: " << scene->path << ":\n";
 

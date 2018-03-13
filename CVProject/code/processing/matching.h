@@ -24,6 +24,7 @@ std::vector<cv::DMatch> findKnn(cv::Mat &modelFeatures, cv::Mat &targetFeatures,
 
     std::vector<cv::DMatch> goodMatches;
 
+
     for (int k = 0; k < matches.size(); k++)
     {
         if ( (matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
@@ -105,15 +106,16 @@ void uniform(std::vector<RichImage*> models, bool andBlur=false) {
         float factor = 1.0f * image->image.size().height / minimum.height ;
         cv::Mat rescaled;
 
-        cv::Size finalSize = CvSize(int(image->image.size().width / factor), int(image->image.size().height / factor));
-        cv::resize(image->image, rescaled, finalSize);
-
         if (andBlur)
-        //todo: does it matter if i blur first and then resize? (the latter should be more conservative w.r.t. quality, imo)
-            GaussianBlur(rescaled, image->image, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
+            GaussianBlur(image->image, rescaled, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
         else {
-            image->image = rescaled;
+            rescaled = image->image;
         }
+
+        //todo:: find a better estimate of the size
+        cv::Size finalSize = CvSize(int(image->image.size().width / factor), int(image->image.size().height / factor));
+        cv::resize(rescaled, image->image, finalSize);
+
     }
 
 }
@@ -124,7 +126,6 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
 
     if (target->features.empty() || target->keypoints.empty())
         algo.detector->detectAndCompute(target->image, cv::Mat(), target->keypoints, target->features );
-
 
     u_long totalMatches[models.size()];
 
@@ -203,8 +204,7 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
 // also, find a way to collapse very close votes
 cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    int patchsize = 1;
-    cv::Mat res = cv::Mat::zeros(scene->image.rows / patchsize, scene->image.cols / patchsize, CV_32SC1);
+    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32SC1);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -219,8 +219,9 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
     data.open("/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/Python/ProjectWork/data.txt", std::ios::out);
 
     for (auto match : matches) {
-        double scale = model->keypoints[match.trainIdx].size / scene->keypoints[match.queryIdx].size ;
-        double angle = -scene->keypoints[match.queryIdx].angle + model->keypoints[match.trainIdx].angle;
+        double scale = scene->keypoints[match.queryIdx].size;
+        double angle = scene->keypoints[match.queryIdx].angle - model->keypoints[match.trainIdx].angle;
+
         cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
         cv::Point2d estimated_bary;
         cv::Vec2d houghmodel = (*model->houghModel)[match.trainIdx];
@@ -232,15 +233,15 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
         houghmodel = rotate(houghmodel, angle);
 
-        estimated_bary.x = (scenept.x +  scale * houghmodel[0])/patchsize;
-        estimated_bary.y = (scenept.y +  scale * houghmodel[1])/patchsize;
-
-        data << estimated_bary.x << "," << estimated_bary.y << "\n";
+        estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
+        estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
 
         if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > res.cols || estimated_bary.y > res.rows) {
             std::cerr << "Ignoring " << estimated_bary << "\n";
             continue;
         }
+
+        data << estimated_bary.x << "," << estimated_bary.y << "\n";
         res.at<int>(estimated_bary) += 1;
     }
     data.close();

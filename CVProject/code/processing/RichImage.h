@@ -39,7 +39,7 @@ struct RichImage {
 
         for (auto kp : this->keypoints) {
             cv::Vec2d actual;
-            actual = cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y); //rotate(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y), -kp.angle);
+            actual = cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y) / kp.size; //rotate(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y), -kp.angle);
             res.push_back(actual);
         }
         this->houghModel = new HoughModel(res);
@@ -48,7 +48,20 @@ struct RichImage {
     public:
 
         void build(Algorithm* algo, bool andBuildHough = false){
+
+            /*cv::Mat edges;
+            cv::Canny(this->image, edges, 150, 200, 3, true);
+
+            this->image = edges;*/
+
             algo->detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
+
+            /// root sift, comment out if not using sift/surf maybe
+            for(int i=0; i< features.rows; ++i)
+            {
+                features.row(i) = features.row(i) / cv::sum(features.row(i))[0];
+                cv::sqrt(features.row(i), features.row(i));
+            }
             if (andBuildHough)
                 buildHoughModel();
 
