@@ -162,4 +162,13 @@ cv::Vec2d rotate(cv::Vec2d src, double angle) {
     return res;
 }
 
+cv::Mat diffuse(cv::Mat in, int side,  double sigmax, double sigmay, double gain=1.0f) {
+    cv::Mat res(in.rows, in.cols, in.type());
+
+    cv::GaussianBlur(in, res, CvSize(side, side), sigmax, sigmay);
+
+    return res + gain*in;
+
+}
+
 #endif //OPENCV_UTILITIES_H

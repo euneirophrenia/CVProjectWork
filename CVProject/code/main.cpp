@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 
     for (int i=0; i < ghtmatch.rows; i++) {
         for (int j=0; j< ghtmatch.cols; j++) {
-            if (ghtmatch.at<int>(i,j) > context["MIN_HOUGH_VOTES"]){
+            if (ghtmatch.at<float>(i,j) >= context["MIN_HOUGH_VOTES"]){
                 std::cout << "Found at (" << i << ", " << j << ")\n";
             }
         }

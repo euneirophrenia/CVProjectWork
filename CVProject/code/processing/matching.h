@@ -103,7 +103,7 @@ void uniform(std::vector<RichImage*> models, bool andBlur=false) {
     /// rescale each image so that its height matches the minimum one
     // I chose height arbitrarily, I could have chosen the width, just not both, i want to preserve proportions
     for (auto image : models) {
-        float factor = 1.0f * image->image.size().height / minimum.height ;
+        float factor = 1.0f * minimum.height / image->image.size().height  ;
         cv::Mat rescaled;
 
         if (andBlur)
@@ -112,8 +112,7 @@ void uniform(std::vector<RichImage*> models, bool andBlur=false) {
             rescaled = image->image;
         }
 
-        //todo:: find a better estimate of the size
-        cv::Size finalSize = CvSize(int(image->image.size().width / factor), int(image->image.size().height / factor));
+        cv::Size finalSize = CvSize(int(image->image.size().width * factor), int(image->image.size().height * factor));
         cv::resize(rescaled, image->image, finalSize);
 
     }
@@ -204,7 +203,7 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
 // also, find a way to collapse very close votes
 cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32SC1);
+    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -219,7 +218,7 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
     data.open("/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/Python/ProjectWork/data.txt", std::ios::out);
 
     for (auto match : matches) {
-        double scale = scene->keypoints[match.queryIdx].size;
+        double scale = int(scene->keypoints[match.queryIdx].size);
         double angle = scene->keypoints[match.queryIdx].angle - model->keypoints[match.trainIdx].angle;
 
         cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
@@ -242,18 +241,11 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
         }
 
         data << estimated_bary.x << "," << estimated_bary.y << "\n";
-        res.at<int>(estimated_bary) += 1;
+        res.at<float>(estimated_bary) += 1;
     }
     data.close();
 
-    //todo:: blob analysis, merge the ~connected estimated barys and provide only one (maybe with a measure of connectiveness
-    //filter here spurious matches by either:
-    //      - setting a threshold
-    //      - tuning search parameters to be strict -> may break connectiveness
-
-    //todo:: finally, since we're basically ignoring perfect matches, test with less powerful detectors, to speed up processing
-
-    return res;
+    return diffuse(res, 3, 4, 4, 1.5);
 }
 
 
