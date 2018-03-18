@@ -25,10 +25,9 @@ struct RichImage {
     cv::Mat image;
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat features;
-    HoughModel* houghModel;
+    std::vector<cv::Vec2d> houghModel;
 
     void buildHoughModel() {
-        std::vector<cv::Vec2d> res;
         ///find barycenter
         cv::Point2f bary;
         for (auto kp : this->keypoints) {
@@ -37,28 +36,20 @@ struct RichImage {
         bary.x /= this->keypoints.size();
         bary.y /= this->keypoints.size();
 
-        for (auto kp : this->keypoints) {
-            cv::Vec2d actual;
-            actual = cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y) / kp.size; //rotate(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y), -kp.angle);
-            res.push_back(actual);
+        for (auto kp : this -> keypoints){
+            this->houghModel.push_back(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y) / kp.size);
         }
-        this->houghModel = new HoughModel(res);
     }
 
     public:
 
         void build(Algorithm* algo, bool andBuildHough = false){
 
-            /*cv::Mat edges;
-            cv::Canny(this->image, edges, 150, 200, 3, true);
-
-            this->image = edges;*/
-
             algo->detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
 
             /// root sift, comment out if not using sift/surf maybe
-            for(int i=0; i< features.rows; ++i)
-            {
+            for(int i=0; i< features.rows; ++i) {
+
                 features.row(i) = features.row(i) / cv::sum(features.row(i))[0];
                 cv::sqrt(features.row(i), features.row(i));
             }

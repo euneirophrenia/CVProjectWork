@@ -17,19 +17,24 @@
 
 //todo: possibly move the threshold to the context
 std::vector<cv::DMatch> findKnn(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher *matcher,
-                                float threshold = 0.7) {
+                                float threshold = 0.7, bool andFilter=true) {
 
     std::vector<std::vector<cv::DMatch>> matches;
     matcher->knnMatch(modelFeatures, targetFeatures, matches, 2);
 
     std::vector<cv::DMatch> goodMatches;
 
-
-    for (int k = 0; k < matches.size(); k++)
-    {
-        if ( (matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
-            goodMatches.push_back(matches[k][0]);
+    if (andFilter){
+        for (int k = 0; k < matches.size(); k++)
+        {
+            if ((matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
+                goodMatches.push_back(matches[k][0]);
+            }
         }
+    }
+    else {
+        for (int k = 0; k < matches.size(); k++)
+                goodMatches.push_back(matches[k][0]);
     }
     return goodMatches;
 }
@@ -180,8 +185,8 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
             double scale = scene->keypoints[match.queryIdx].size / models[i]->keypoints[match.trainIdx].size;
             cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
             cv::Point2d estimated_bary;
-            estimated_bary.x = scenept.x - scale * (*models[i]->houghModel)[match.trainIdx][0];
-            estimated_bary.y = scenept.y - scale * (*models[i]->houghModel)[match.trainIdx][1];
+            estimated_bary.x = scenept.x - scale * models[i]->houghModel[match.trainIdx][0];
+            estimated_bary.y = scenept.y - scale * models[i]->houghModel[match.trainIdx][1];
 
             votes[(int)estimated_bary.x][(int)estimated_bary.y].push_back(match);
         }
@@ -203,7 +208,7 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
 // also, find a way to collapse very close votes
 cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
+    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32F);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -212,23 +217,17 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
         algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
 
 
-    std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo.matcher, context["THRESHOLD"]);
+    std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo.matcher, context["THRESHOLD"], true);
 
-    std::ofstream data;
-    data.open("/Users/marcodivincenzo/Documents/Ingegneria/Magistrale/CV/Python/ProjectWork/data.txt", std::ios::out);
 
     for (auto match : matches) {
-        double scale = int(scene->keypoints[match.queryIdx].size);
+        double scale = scene->keypoints[match.queryIdx].size;
         double angle = scene->keypoints[match.queryIdx].angle - model->keypoints[match.trainIdx].angle;
 
         cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
         cv::Point2d estimated_bary;
-        cv::Vec2d houghmodel = (*model->houghModel)[match.trainIdx];
+        cv::Vec2d houghmodel = model->houghModel[match.trainIdx];
 
-        /*std::cout << "Size :" << model->keypoints[match.trainIdx].size << "/" << scene->keypoints[match.queryIdx].size << "\n";
-        std::cout << "Angle :" << model->keypoints[match.trainIdx].angle << "/" << scene->keypoints[match.queryIdx].angle << "\n";
-        std::cout << "Response :" << model->keypoints[match.trainIdx].response << "/" << scene->keypoints[match.queryIdx].response << "\n";
-        std::cout << "------------\n";*/
 
         houghmodel = rotate(houghmodel, angle);
 
@@ -240,12 +239,16 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
             continue;
         }
 
-        data << estimated_bary.x << "," << estimated_bary.y << "\n";
-        res.at<float>(estimated_bary) += 1;
-    }
-    data.close();
+        for (int x= int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
+            for (int y= int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
+                res.at<float>(y,x) +=1;
+            }
+        }
+        //res.at<float>(estimated_bary) += 1;
 
-    return diffuse(res, 3, 4, 4, 1.5);
+    }
+
+    return res;
 }
 
 

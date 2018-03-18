@@ -171,4 +171,5 @@ cv::Mat diffuse(cv::Mat in, int side,  double sigmax, double sigmay, double gain
 
 }
 
+
 #endif //OPENCV_UTILITIES_H
