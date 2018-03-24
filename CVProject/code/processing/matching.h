@@ -12,6 +12,7 @@
 #include "RichImage.h"
 #include <vector>
 #include <string>
+#include "blob.h"
 
 
 
@@ -204,9 +205,8 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
     return res;
 }
 
-//todo:: the houghModel probably gets built wrongly, look into that
-// also, find a way to collapse very close votes
-cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
+
+std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
     cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32S);
 
@@ -236,6 +236,7 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
         if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > res.cols || estimated_bary.y > res.rows) {
             std::cerr << "Ignoring " << estimated_bary << "\n";
+            //todo:: make it ~rubberband on the border, it may still provide useful insights
             continue;
         }
 
@@ -249,11 +250,40 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
     cv::Mat labels(res.size(), CV_32S);
     int howmany = cv::connectedComponents(res > 0, labels, 8);
-    std::cout << "Found " << howmany << " instances.\n";
 
-    //todo:: aggreggate pixels with same label in the same blob
+    if (howmany < 2)
+        return std::vector<BlobPosition>();
 
-    return res;
+    //std::cout << "Found " << howmany << " instances.\n";
+
+    int current;
+    BlobPosition blobs[howmany-1];
+
+    for (int x= 0; x< labels.rows; x++) {
+        for (int y= 0; y< labels.cols; y++) {
+            current = labels.at<int>(x,y);
+
+            ///background
+            if (current == 0)
+                continue;
+
+            blobs[current-1].position += res.at<int>(x,y)*cv::Point2d(y,x);
+            blobs[current-1].confidence += res.at<int>(x,y);
+            blobs[current-1].area += 1;
+        }
+    }
+
+    std::vector<BlobPosition> actual;
+
+    for (int i=0; i<howmany-1; i++) {
+        blobs[i].position /= blobs[i].confidence;
+        blobs[i].confidence /= blobs[i].area;
+
+        actual.push_back(blobs[i]);
+        //std::cout << blobs[i].position << ", " << blobs[i].confidence << "\n";
+    }
+
+    return actual;
 }
 
 

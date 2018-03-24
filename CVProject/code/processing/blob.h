@@ -10,7 +10,10 @@
 struct BlobPosition {
 
     cv::Point2d position;
-    int confidence;
+    float confidence;
+    int area;
+
+    BlobPosition() : position(cv::Point2d(0,0)), confidence(0.0f), area(0) {}
 
 };
 
@@ -23,27 +26,44 @@ std::vector<cv::KeyPoint> simpleBlob(cv::Mat& in) {
     return keypoints;
 }
 
-/*std::vector<BlobPosition> aggregate(cv::Mat& in) {
+std::vector<BlobPosition> aggregate(cv::Mat& in) {
 
-    cv::Mat temp(in.rows, in.cols, in.type());
-    std::vector<BlobPosition> res;
+    cv::Mat labels(in.size(), CV_32S);
+    int howmany = cv::connectedComponents(in > 0, labels, 8);
 
-    std::vector<cv::Point2d> potential;
+    if (howmany < 2)
+        return std::vector<BlobPosition>();
 
-    for (int i=0; i<in.rows; i++) {
-        for (int j=0; j<in.cols; j++) {
-            if (in.data[i*in.step + j] > 0) {
-                cv::Point2d p(j,i);
-                potential.push_back(p);
-            }
+
+    int current;
+    BlobPosition blobs[howmany-1];
+
+    for (int x= 0; x< labels.rows; x++) {
+        for (int y= 0; y< labels.cols; y++) {
+            current = labels.at<int>(x,y);
+
+            ///background
+            if (current == 0)
+                continue;
+
+            blobs[current-1].position += in.at<int>(x,y)*cv::Point2d(y,x);
+            blobs[current-1].confidence += in.at<int>(x,y);
+            blobs[current-1].area += 1;
         }
     }
 
+    std::vector<BlobPosition> actual;
 
+    for (int i=0; i<howmany-1; i++) {
+        blobs[i].position /= blobs[i].confidence;
+        blobs[i].confidence /= blobs[i].area;
 
-    return res;
+        actual.push_back(blobs[i]);
+    }
 
-}*/
+    return actual;
+
+}
 
 
 

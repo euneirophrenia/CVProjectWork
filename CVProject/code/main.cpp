@@ -5,7 +5,7 @@
 #include "processing/matching.h"
 
 #define TEST_SCENE "scenes/h1.jpg"
-#define TEST_MODEL 1
+#define TEST_MODEL 14
 
 
 //TODO: create a ~factory to make it easy to select algorithm and parameters
@@ -92,22 +92,20 @@ int main(int argc, char** argv) {
     }*/
 
     auto ghtmatch = GHTMatch(model_references[TEST_MODEL], scene, *alg);
-    std::cout <<"Looking for " << model_references[TEST_MODEL]->path << "\n";
+    std::cout <<"Looking for " << model_references[TEST_MODEL]->path << "\n\n";
 
-    bool found = false;
-    for (int i=0; i < ghtmatch.rows; i++) {
-        for (int j=0; j< ghtmatch.cols; j++) {
-            if (ghtmatch.at<int>(i,j) >= context["MIN_HOUGH_VOTES"]){
-                std::cout << "Found at (" << i << ", " << j << ")\n";
-                cv::drawMarker(scene->image,cv::Point2d(j,i), cv::Scalar(255,255,255));
-                found |= true;
-            }
+    if (!ghtmatch.empty()) {
+       for (auto blob : ghtmatch) {
+                if (blob.confidence >= context["MIN_HOUGH_VOTES"]) {
+                    std::cout << "Found at " << blob.position << "\t(" << blob.confidence << ")\n";
+                    cv::drawMarker(scene->image, blob.position, cv::Scalar(255, 255, 255));
+                }
+
         }
-    }
 
-    if (found) {
         cv::imshow("?", scene->image);
         cv::waitKey(0);
+
     }
 
 }
