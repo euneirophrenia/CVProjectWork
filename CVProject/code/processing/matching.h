@@ -208,7 +208,7 @@ std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::ve
 // also, find a way to collapse very close votes
 cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32F);
+    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32S);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -241,12 +241,17 @@ cv::Mat GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
         for (int x= int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
             for (int y= int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
-                res.at<float>(y,x) +=1;
+                res.at<int>(y,x) +=1;
             }
         }
-        //res.at<float>(estimated_bary) += 1;
 
     }
+
+    cv::Mat labels(res.size(), CV_32S);
+    int howmany = cv::connectedComponents(res > 0, labels, 8);
+    std::cout << "Found " << howmany << " instances.\n";
+
+    //todo:: aggreggate pixels with same label in the same blob
 
     return res;
 }

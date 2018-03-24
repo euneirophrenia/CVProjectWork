@@ -28,7 +28,7 @@
   "GAUSSIAN_X_SIGMA" : 4,
   "GAUSSIAN_Y_SIGMA" : 4,
 
-  "MIN_HOUGH_VOTES" : 10
+  "MIN_HOUGH_VOTES" : 5
 
 
 }
