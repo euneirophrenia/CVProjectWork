@@ -5,7 +5,7 @@
 #include "processing/matching.h"
 
 #define TEST_SCENE "scenes/h1.jpg"
-#define TEST_MODEL 14
+#define TEST_MODEL 1
 
 
 //TODO: create a ~factory to make it easy to select algorithm and parameters
@@ -93,6 +93,8 @@ int main(int argc, char** argv) {
 
     auto ghtmatch = GHTMatch(model_references[TEST_MODEL], scene, *alg);
     std::cout <<"Looking for " << model_references[TEST_MODEL]->path << "\n\n";
+
+    cv::Mat model = model_references[TEST_MODEL]->image;
 
     if (!ghtmatch.empty()) {
        for (auto blob : ghtmatch) {

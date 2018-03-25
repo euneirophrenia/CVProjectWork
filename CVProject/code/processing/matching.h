@@ -167,48 +167,11 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     return res;
 }
 
-std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
-
-    std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> res;
-
-    if (scene->keypoints.empty())
-        algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
-
-    for (int i=0; i<models.size(); i++){
-
-        std::vector<cv::DMatch> votes[scene->image.rows][scene->image.cols];
-
-
-        std::vector<cv::DMatch> matches = findKnn(models[i]->features, scene->features, algo.matcher,
-                                                  context["THRESHOLD"]);
-
-        for (auto match : matches) {
-            double scale = scene->keypoints[match.queryIdx].size / models[i]->keypoints[match.trainIdx].size;
-            cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
-            cv::Point2d estimated_bary;
-            estimated_bary.x = scenept.x - scale * models[i]->houghModel[match.trainIdx][0];
-            estimated_bary.y = scenept.y - scale * models[i]->houghModel[match.trainIdx][1];
-
-            votes[(int)estimated_bary.x][(int)estimated_bary.y].push_back(match);
-        }
-
-        res[models[i]] = std::vector<std::vector<cv::DMatch>>();
-
-        for (int j=0; j< scene->image.rows; j++) {
-            for (int k =0; k < scene->image.cols; k++) {
-                if (votes[j][k].size() > context["MIN_HOUGH_VOTES"])
-                    res[models[i]].push_back(votes[j][k]);
-            }
-        }
-    }
-
-    return res;
-}
-
 
 std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    cv::Mat res = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32S);
+    cv::Mat votes = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32SC1);
+    cv::Mat scales = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -234,7 +197,7 @@ std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm
         estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
         estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
 
-        if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > res.cols || estimated_bary.y > res.rows) {
+        if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > votes.cols || estimated_bary.y > votes.rows) {
             std::cerr << "Ignoring " << estimated_bary << "\n";
             //todo:: make it ~rubberband on the border, it may still provide useful insights
             continue;
@@ -242,48 +205,29 @@ std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm
 
         for (int x= int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
             for (int y= int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
-                res.at<int>(y,x) +=1;
+                votes.at<int>(y,x) +=1;
+                scales.at<float>(y,x) += model->keypoints[match.trainIdx].size / scale;
             }
         }
 
     }
 
-    cv::Mat labels(res.size(), CV_32S);
-    int howmany = cv::connectedComponents(res > 0, labels, 8);
+    return aggregate(votes, scales);
+}
 
-    if (howmany < 2)
-        return std::vector<BlobPosition>();
+std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
 
-    //std::cout << "Found " << howmany << " instances.\n";
+    std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> res;
 
-    int current;
-    BlobPosition blobs[howmany-1];
+    if (scene->keypoints.empty())
+        algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
 
-    for (int x= 0; x< labels.rows; x++) {
-        for (int y= 0; y< labels.cols; y++) {
-            current = labels.at<int>(x,y);
-
-            ///background
-            if (current == 0)
-                continue;
-
-            blobs[current-1].position += res.at<int>(x,y)*cv::Point2d(y,x);
-            blobs[current-1].confidence += res.at<int>(x,y);
-            blobs[current-1].area += 1;
-        }
+    for (int i=0; i<models.size(); i++){
+        auto matches = GHTMatch(models[i], scene, algo);
+        //elaborate matches and if some blob overlaps with other blobs, keep the one with highest confidence
     }
 
-    std::vector<BlobPosition> actual;
-
-    for (int i=0; i<howmany-1; i++) {
-        blobs[i].position /= blobs[i].confidence;
-        blobs[i].confidence /= blobs[i].area;
-
-        actual.push_back(blobs[i]);
-        //std::cout << blobs[i].position << ", " << blobs[i].confidence << "\n";
-    }
-
-    return actual;
+    return res;
 }
 
 
