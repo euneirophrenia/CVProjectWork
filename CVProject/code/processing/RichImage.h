@@ -14,7 +14,6 @@
 #include "../utilities/ResourcePool.h"
 #include "../utilities/tools.h"
 #include "../context.h"
-#include "ght.h"
 
 #include "opencv2/xfeatures2d/nonfree.hpp"
 

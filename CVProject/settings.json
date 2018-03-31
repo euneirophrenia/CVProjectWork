@@ -8,7 +8,7 @@
   "MIN_MATCHES" : 50, // to state that an object has been found, in the basic algorithm
   "THRESHOLD"  : 0.6, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
 
-  "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just oto not have some random exceptions when trying to load a directory of images, you know..
+  "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just to not have some random exceptions when trying to load a directory of images, you know..
 
   // ALGORITHMS PARAMETERS
   "SURF_MIN_HESSIAN" : 400.0, // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
@@ -28,7 +28,8 @@
   "GAUSSIAN_X_SIGMA" : 4,
   "GAUSSIAN_Y_SIGMA" : 4,
 
-  "MIN_HOUGH_VOTES" : 100
+  "MIN_HOUGH_VOTES" : 80,
+  "MAX_DISTANCE" : 20
 
 
 }

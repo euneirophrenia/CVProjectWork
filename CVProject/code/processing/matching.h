@@ -15,7 +15,6 @@
 #include "blob.h"
 
 
-
 //todo: possibly move the threshold to the context
 std::vector<cv::DMatch> findKnn(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher *matcher,
                                 float threshold = 0.7, bool andFilter=true) {
@@ -212,20 +211,47 @@ std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm
 
     }
 
-    return aggregate(votes, scales);
+    return aggregate(votes, scales, model->path);
 }
 
-std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> GHTmultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+std::map<std::string, std::vector<BlobPosition>> GHTMultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
 
-    std::map<RichImage*, std::vector<std::vector<cv::DMatch>>> res;
+    std::map<std::string, std::vector<BlobPosition>> res;
+    std::vector<BlobPosition> blobs, temp;
+
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
 
+
     for (int i=0; i<models.size(); i++){
+        res[models[i]->path] = std::vector<BlobPosition>();
+
         auto matches = GHTMatch(models[i], scene, algo);
-        //elaborate matches and if some blob overlaps with other blobs, keep the one with highest confidence
+
+        for (int mi = 0; mi < matches.size(); mi++) {
+            bool placed=false;
+            for (int bi = 0; bi < blobs.size(); bi++) {
+
+                if ((matches[mi].confidence > blobs[bi].confidence) &&
+                    (cv::norm(blobs[bi].position - matches[mi].position) <= context["MAX_DISTANCE"])) {
+                    blobs[bi] = matches[mi];
+                    placed=true;
+                }
+            }
+
+            if (!placed)
+                blobs.push_back(matches[mi]);
+
+            }
+
+        }
+
+    for (auto blob : blobs) {
+        if (indexOf<BlobPosition>(blob, res[blob.modelName]) < 0)
+            res[blob.modelName].push_back(blob);
     }
+
 
     return res;
 }

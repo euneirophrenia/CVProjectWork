@@ -14,7 +14,18 @@ struct BlobPosition {
     float scale;
     int area;
 
-    BlobPosition() : position(cv::Point2d(0,0)), confidence(0.0f), area(0), scale(0) {}
+    std::string modelName;
+
+    BlobPosition() : position(cv::Point2d(0,0)), confidence(0.0f), area(0), scale(0), modelName("") {}
+
+    bool operator== (BlobPosition& other) {
+        return this->position == other.position
+               && this->scale == other.scale
+               && this-> area == other.area
+               && this-> confidence == other.confidence
+               && this->modelName == other.modelName;
+
+    }
 
 };
 
@@ -27,7 +38,7 @@ std::vector<cv::KeyPoint> simpleBlob(cv::Mat& in) {
     return keypoints;
 }
 
-std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales) {
+std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales, std::string modelName) {
 
     cv::Mat labels(votes.size(), CV_32S);
     int howmany = cv::connectedComponents(votes > 0, labels, 8);
@@ -48,6 +59,7 @@ std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales) {
             if (current == 0)
                 continue;
 
+            blobs[current-1].modelName = modelName;
             blobs[current-1].position += votes.at<int>(x,y)*cv::Point2d(y,x);
             blobs[current-1].confidence += votes.at<int>(x,y);
             blobs[current-1].area += 1;

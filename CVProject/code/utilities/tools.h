@@ -171,5 +171,28 @@ cv::Mat diffuse(cv::Mat in, int side,  double sigmax, double sigmay, double gain
 
 }
 
+template<typename T>
+int indexOf(T elem, std::vector<T> vec) {
+    for (int i=0; i< vec.size(); i++) {
+        if (vec[i] == elem)
+            return i;
+    }
 
+    return -1;
+}
+
+
+std::string fileName(const std::string& str, bool withoutExtension = false)
+{
+    size_t found = str.find_last_of("/\\");
+    std::string path = str.substr(found+1); // check that is OK
+
+    if (withoutExtension) {
+        found = path.find_last_of(".");
+        if (found > 0)
+            path = path.substr(0, found);
+    }
+
+    return path;
+}
 #endif //OPENCV_UTILITIES_H

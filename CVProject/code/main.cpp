@@ -12,7 +12,15 @@
 //todo: change some scripted params with the context ones
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv){
+
+    std::map<std::string, std::string> ids;
+
+    auto msize = context.MODELS.size();
+
+    for (int i =0; i< msize; i++) {
+        ids[context.MODELS[i]] = fileName(context.MODELS[i], true);
+    }
 
     /// setup the algorithm
     auto detector = cv::xfeatures2d::SIFT::create();
@@ -52,6 +60,8 @@ int main(int argc, char** argv) {
     auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
     scene -> build(alg);
 
+    auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
+
     /*auto mag = magnitudeSpectrum(scene->image);
     cv::imshow("??", mag) ;
     cv::waitKey(0);*/
@@ -78,7 +88,7 @@ int main(int argc, char** argv) {
     }*/
 
 
-    /*auto multi = GHTmultiMatch(model_references, scene, *alg);
+    /*auto multi = GHTMultiMatch(model_references, scene, *alg);
 
 
 
@@ -91,23 +101,29 @@ int main(int argc, char** argv) {
         }
     }*/
 
-    auto ghtmatch = GHTMatch(model_references[TEST_MODEL], scene, *alg);
-    std::cout <<"Looking for " << model_references[TEST_MODEL]->path << "\n\n";
+    auto multi = GHTMultiMatch(model_references, scene, *alg);
+    for (auto match : multi) {
+        auto ghtmatch = match.second;
+        std::string modelname = match.first;
+        //auto ghtmatch = GHTMatch(model_references[TEST_MODEL], scene, *alg);
+        //std::cout << "Looking for " << model_references[TEST_MODEL]->path << "\n\n";
+        std::cout << "\nLooking for " << modelname << "\n";
 
-    cv::Mat model = model_references[TEST_MODEL]->image;
-
-    if (!ghtmatch.empty()) {
-       for (auto blob : ghtmatch) {
+        if (!ghtmatch.empty()) {
+            for (auto blob : ghtmatch) {
                 if (blob.confidence >= context["MIN_HOUGH_VOTES"]) {
-                    std::cout << "Found at " << blob.position << "\t(" << blob.confidence << ")\n";
-                    cv::drawMarker(scene->image, blob.position, cv::Scalar(255, 255, 255));
+                    std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:" << blob.area << ")\n";
+                    //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
+
+                    cv::putText(colorscene, ids[blob.modelName], blob.position,
+                                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255,250));
+
                 }
 
+            }
         }
-
-        cv::imshow("?", scene->image);
-        cv::waitKey(0);
-
     }
+    cv::imshow("Matches", colorscene);
+    cv::waitKey(0);
 
 }
