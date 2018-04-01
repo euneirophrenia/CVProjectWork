@@ -10,26 +10,32 @@
 
   "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just to not have some random exceptions when trying to load a directory of images, you know..
 
-  // ALGORITHMS PARAMETERS
-  "SURF_MIN_HESSIAN" : 400.0, // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
+  "KDTREES_INDEX" : 5, // how many trees to use in the knnSearch with the SIFT and SURF algorithms
+  "FLANN_SEARCH_ITERATIONS" : 50, // how many times perform checks on the trees (the higher, the slower but better results)
+
+  //parameters used in the initial blur
+  "GAUSSIAN_KERNEL_SIZE" : [3,3], // width x height, must be odd numbers (ask opencv why)
+  "GAUSSIAN_X_SIGMA" : 1,
+  "GAUSSIAN_Y_SIGMA" : 1,
+
+  "MIN_HOUGH_VOTES" : 90,
+  "MAX_DISTANCE" : 10,
+
+
+
+
 
   "BRISK_THRESHOLD" : 60,
   "BRISK_OCTAVES" : 4,
   "BRISK_PATTERNSCALE" : 1.0,
 
-  "KDTREES_INDEX" : 5, // how many trees to use in the knnSearch with the SIFT and SURF algorithms
-  "FLANN_SEARCH_ITERATIONS" : 50, // how many times perform checks on the trees (the higher, the slower but better results)
+
   "LSH_INDEX_TABLES" : 20, // for BRISK/ORB + knnSearch of the Flann matcher
   "LSH_INDEX_KEY_SIZE" : 10, // '' '' '' ''
   "LSH_INDEX_MULTIPROBE_LEVEL" : 2, // '' '' '' '' ''
 
-  //parameters used in the initial blur
-  "GAUSSIAN_KERNEL_SIZE" : [3,3], // width x height, must be odd numbers (ask opencv why)
-  "GAUSSIAN_X_SIGMA" : 4,
-  "GAUSSIAN_Y_SIGMA" : 4,
-
-  "MIN_HOUGH_VOTES" : 80,
-  "MAX_DISTANCE" : 20
+  // ALGORITHMS PARAMETERS
+  "SURF_MIN_HESSIAN" : 400.0 // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
 
 
 }

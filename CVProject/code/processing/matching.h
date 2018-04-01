@@ -169,7 +169,7 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
 
 std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
 
-    cv::Mat votes = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32SC1);
+    cv::Mat votes = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
     cv::Mat scales = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
 
     if (scene->keypoints.empty())
@@ -202,9 +202,10 @@ std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm
             continue;
         }
 
-        for (int x= int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
-            for (int y= int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
-                votes.at<int>(y,x) +=1;
+        for (int x = int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
+            for (int y = int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
+                auto dist = (estimated_bary.x - x)*(estimated_bary.x - x) + (estimated_bary.y - y)*(estimated_bary.y - y);
+                votes.at<float>(y,x) += 1.5*exp(-dist/5.0) ;
                 scales.at<float>(y,x) += model->keypoints[match.trainIdx].size / scale;
             }
         }
@@ -255,6 +256,8 @@ std::map<std::string, std::vector<BlobPosition>> GHTMultiMatch(std::vector<RichI
 
     return res;
 }
+
+
 
 
 #endif //PROJECTWORK_MATCHING_H

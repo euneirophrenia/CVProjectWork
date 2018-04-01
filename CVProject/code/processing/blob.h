@@ -60,8 +60,8 @@ std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales, std::string
                 continue;
 
             blobs[current-1].modelName = modelName;
-            blobs[current-1].position += votes.at<int>(x,y)*cv::Point2d(y,x);
-            blobs[current-1].confidence += votes.at<int>(x,y);
+            blobs[current-1].position += votes.at<float>(x,y)*cv::Point2d(y,x);
+            blobs[current-1].confidence += votes.at<float>(x,y);
             blobs[current-1].area += 1;
             blobs[current-1].scale += scales.at<float>(x,y);
         }
@@ -70,12 +70,14 @@ std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales, std::string
     std::vector<BlobPosition> actual;
 
     for (int i=0; i<howmany-1; i++) {
-        blobs[i].position /= blobs[i].confidence;
-        //blobs[i].confidence /= blobs[i].area; //without this its more precise in doubtful areas
-        blobs[i].scale /= blobs[i].area;
+        if (blobs[i].confidence >= context["MIN_HOUGH_VOTES"]) {
+            blobs[i].position /= blobs[i].confidence;
+            //blobs[i].confidence /= blobs[i].area; //without this its more precise in doubtful areas
+            blobs[i].scale /= blobs[i].area;
 
-        actual.push_back(blobs[i]);
-        //std::cout << blobs[i].position << ", " << blobs[i].confidence << "\n";
+            actual.push_back(blobs[i]);
+            //std::cout << blobs[i].position << ", " << blobs[i].confidence << "\n";
+        }
     }
 
     return actual;

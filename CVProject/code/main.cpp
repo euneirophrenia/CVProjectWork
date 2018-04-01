@@ -4,7 +4,7 @@
 
 #include "processing/matching.h"
 
-#define TEST_SCENE "scenes/h1.jpg"
+#define TEST_SCENE "scenes/h2.jpg"
 #define TEST_MODEL 1
 
 
@@ -45,7 +45,7 @@ int main(int argc, char** argv){
 
     /// unify model sizes
     std::vector<RichImage*> model_references;
-    for (auto p : context.MODELS) {
+    for (auto& p : context.MODELS) {
         model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
     }
 
@@ -62,9 +62,6 @@ int main(int argc, char** argv){
 
     auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
 
-    /*auto mag = magnitudeSpectrum(scene->image);
-    cv::imshow("??", mag) ;
-    cv::waitKey(0);*/
 
     std::cout <<"Scene: " << scene->path << ":\n";
 
@@ -87,19 +84,28 @@ int main(int argc, char** argv){
         }
     }*/
 
+    /*auto testmodel = new RichImage("../CVProject/models/6.jpg");
+    cv::Mat testcolor = cv::imread("../CVProject/models/6-1.jpg", cv::IMREAD_COLOR);
+    auto testrotated = new RichImage("../CVProject/models/6-1.jpg");
 
-    /*auto multi = GHTMultiMatch(model_references, scene, *alg);
+    testmodel->build(alg, true);
+    testrotated->build(alg);
 
-
-
-    for(auto m: model_references){
-        for (auto occurrence : multi[m]){
-            if (occurrence.size() > context.MIN_MATCHES) {
-                auto at = showMatches(*m, *scene, occurrence);
-                std::cout << "\tModel " << m->path << " found at " << at << " (" << occurrence.size() << "/" <<context.MIN_MATCHES << ")\n";
-            }
+    auto ghttest = GHTMatch(testmodel, testrotated, *alg);
+    for (auto blob : ghttest) {
+        if (blob.confidence >= context["MIN_HOUGH_VOTES"]) {
+            std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:"
+                                                 << blob.area << ")\n";
+            cv::drawMarker(testcolor, blob.position, CvScalar(255, 255, 255));
         }
-    }*/
+    }
+
+    cv::imshow("test hough", testcolor);
+    cv::waitKey(0);
+
+    exit(1);*/
+
+
 
     auto multi = GHTMultiMatch(model_references, scene, *alg);
     for (auto match : multi) {
@@ -111,14 +117,11 @@ int main(int argc, char** argv){
 
         if (!ghtmatch.empty()) {
             for (auto blob : ghtmatch) {
-                if (blob.confidence >= context["MIN_HOUGH_VOTES"]) {
-                    std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:" << blob.area << ")\n";
-                    //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
+                std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:" << blob.area << ")\n";
+                //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
 
-                    cv::putText(colorscene, ids[blob.modelName], blob.position,
-                                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255,250));
-
-                }
+                cv::putText(colorscene, ids[blob.modelName], blob.position,
+                            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255,250));
 
             }
         }
