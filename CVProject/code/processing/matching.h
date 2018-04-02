@@ -39,6 +39,29 @@ std::vector<cv::DMatch> findKnn(cv::Mat &modelFeatures, cv::Mat &targetFeatures,
     return goodMatches;
 }
 
+std::vector<cv::DMatch> MultiFindKnn(std::vector<cv::Mat> modelFeatures, cv::Mat& targetFeatures, cv::DescriptorMatcher* matcher,
+                                                float threshold = 0.6, bool andClear = true) {
+    std::vector<std::vector<cv::DMatch>> matches;
+
+    matcher->add(modelFeatures);
+    matcher->knnMatch(targetFeatures, matches, 2);
+
+    std::vector<cv::DMatch> goodMatches;
+
+    for (int k = 0; k < matches.size(); k++)
+    {
+        if ((matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
+            goodMatches.push_back(matches[k][0]);
+        }
+    }
+
+    if (andClear)
+        matcher->clear();
+
+    return goodMatches;
+
+}
+
 std::vector<cv::DMatch> findRadius(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher * matcher, float distance){
     std::vector<std::vector<cv::DMatch>> matches;
     matcher->radiusMatch(modelFeatures, targetFeatures, matches, distance);
@@ -166,8 +189,8 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     return res;
 }
 
-
-std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm algo) {
+/*
+std::vector<Blob> _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo) {
 
     cv::Mat votes = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
     cv::Mat scales = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
@@ -215,10 +238,10 @@ std::vector<BlobPosition> GHTMatch(RichImage* model, RichImage* scene, Algorithm
     return aggregate(votes, scales, model->path);
 }
 
-std::map<std::string, std::vector<BlobPosition>> GHTMultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+std::map<std::string, std::vector<Blob>> _GHTMultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
 
-    std::map<std::string, std::vector<BlobPosition>> res;
-    std::vector<BlobPosition> blobs, temp;
+    std::map<std::string, std::vector<Blob>> res;
+    std::vector<Blob> blobs, temp;
 
 
     if (scene->keypoints.empty())
@@ -226,9 +249,9 @@ std::map<std::string, std::vector<BlobPosition>> GHTMultiMatch(std::vector<RichI
 
 
     for (int i=0; i<models.size(); i++){
-        res[models[i]->path] = std::vector<BlobPosition>();
+        res[models[i]->path] = std::vector<Blob>();
 
-        auto matches = GHTMatch(models[i], scene, algo);
+        auto matches = _ghtmatch(models[i], scene, algo);
 
         for (int mi = 0; mi < matches.size(); mi++) {
             bool placed=false;
@@ -249,14 +272,111 @@ std::map<std::string, std::vector<BlobPosition>> GHTMultiMatch(std::vector<RichI
         }
 
     for (auto blob : blobs) {
-        if (indexOf<BlobPosition>(blob, res[blob.modelName]) < 0)
+        if (indexOf<Blob>(blob, res[blob.modelName]) < 0)
             res[blob.modelName].push_back(blob);
+    }
+
+    return res;
+}
+*/
+
+std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+    std::map<std::string, std::vector<Blob>> res;
+
+    if (scene->keypoints.empty())
+        algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
+
+    std::vector<cv::Mat> modelfeats;
+
+    for (auto model : models) {
+        modelfeats.push_back(model->features);
+    }
+
+    auto dmatches = MultiFindKnn(modelfeats, scene->features, algo.matcher, context["THRESHOLD"]);
+
+    std::vector<cv::Mat> votes;
+    std::vector<cv::Mat> scales;
+
+    for (int i=0; i < models.size(); i++) {
+        cv::Mat z1 = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
+        cv::Mat z2 = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
+        votes.push_back(z1);
+        scales.push_back(z2);
+    }
+
+    for (auto match : dmatches) {
+        double scale = scene->keypoints[match.queryIdx].size;
+        double angle = scene->keypoints[match.queryIdx].angle - models[match.imgIdx]->keypoints[match.trainIdx].angle;
+
+        cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
+        cv::Point2d estimated_bary;
+        cv::Vec2d houghmodel = models[match.imgIdx]->houghModel[match.trainIdx];
+
+
+        houghmodel = rotate(houghmodel, angle);
+
+        estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
+        estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
+
+        if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > votes[match.imgIdx].cols ||
+            estimated_bary.y > votes[match.imgIdx].rows)
+        {
+            std::cerr << "Ignoring " << estimated_bary << "\n";
+            //todo:: make it ~rubberband on the border, it may still provide useful insights
+            continue;
+        }
+
+        for (int x = int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
+            for (int y = int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
+                auto dist = (estimated_bary.x - x)*(estimated_bary.x - x) + (estimated_bary.y - y)*(estimated_bary.y - y);
+                votes[match.imgIdx].at<float>(y,x) += 1*exp(-dist/8.0) ;
+                scales[match.imgIdx].at<float>(y,x) += models[match.imgIdx]->keypoints[match.trainIdx].size / scale;
+            }
+        }
+
+    }
+
+    std::vector<Blob> allblobs;
+    std::vector<size_t> indicesToRemove;
+
+    for (int i=0; i< models.size(); i++) {
+        auto matches = aggregate(votes[i], scales[i], models[i]->path);
+        res[models[i]->path] = std::vector<Blob>();
+
+        for (auto blob : matches) {
+            indicesToRemove.clear();
+            bool best=true;
+
+            for (int k =0; k<allblobs.size() && best; k++){
+                double dist = distance(allblobs[k].position, blob.position);
+                if (allblobs[k].confidence >= blob.confidence &&  dist <= context["MAX_DISTANCE"]) {
+                    best = false;
+                }
+
+                if (allblobs[k].confidence < blob.confidence && dist <= context["MAX_DISTANCE"]) {
+                    indicesToRemove.push_back(k);
+                    std::cerr << "[PRUNING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
+                              allblobs[k].confidence << ") in favor of " << blob.modelName << " (" << blob.position << ", " <<
+                             blob.confidence << ") - " << dist << "\n";
+                }
+            }
+
+            if (best)
+                allblobs.push_back(blob);
+
+            allblobs = erase_indices(allblobs, indicesToRemove);
+        }
+
+    }
+
+    for (auto blob: allblobs) {
+        res[blob.modelName].push_back(blob);
     }
 
 
     return res;
-}
 
+}
 
 
 

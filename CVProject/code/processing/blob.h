@@ -7,7 +7,7 @@
 
 #include "opencv2/opencv.hpp"
 
-struct BlobPosition {
+struct Blob {
 
     cv::Point2d position;
     float confidence;
@@ -16,15 +16,19 @@ struct BlobPosition {
 
     std::string modelName;
 
-    BlobPosition() : position(cv::Point2d(0,0)), confidence(0.0f), area(0), scale(0), modelName("") {}
+    Blob() : position(cv::Point2d(0,0)), confidence(0.0f), area(0), scale(0), modelName("") {}
 
-    bool operator== (BlobPosition& other) {
+    bool operator== (Blob& other) {
         return this->position == other.position
                && this->scale == other.scale
                && this-> area == other.area
                && this-> confidence == other.confidence
                && this->modelName == other.modelName;
 
+    }
+
+    bool operator != (Blob& other) {
+        return ! (*this == other);
     }
 
 };
@@ -38,18 +42,25 @@ std::vector<cv::KeyPoint> simpleBlob(cv::Mat& in) {
     return keypoints;
 }
 
-std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales, std::string modelName) {
+std::vector<Blob> aggregate(cv::Mat& votes, cv::Mat& scales, std::string modelName) {
 
     cv::Mat labels(votes.size(), CV_32S);
     int howmany = cv::connectedComponents(votes > 0, labels, 8);
 
     if (howmany < 2)
-        return std::vector<BlobPosition>();
+        return std::vector<Blob>();
 
     //std::cout << "Found " << howmany << " instances.\n";
 
     int current;
-    BlobPosition blobs[howmany-1];
+    Blob blobs[howmany-1];
+
+    for (int k=0; k< howmany-1; k++)
+        blobs[k].modelName = modelName;
+
+
+    if (howmany > 2 && blobs[0].modelName != blobs[1].modelName)
+        std::cout <<"[TEST] "  << blobs[0].modelName << ", " << blobs[1].modelName << "\n";
 
     for (int x= 0; x< labels.rows; x++) {
         for (int y= 0; y< labels.cols; y++) {
@@ -59,7 +70,6 @@ std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales, std::string
             if (current == 0)
                 continue;
 
-            blobs[current-1].modelName = modelName;
             blobs[current-1].position += votes.at<float>(x,y)*cv::Point2d(y,x);
             blobs[current-1].confidence += votes.at<float>(x,y);
             blobs[current-1].area += 1;
@@ -67,7 +77,7 @@ std::vector<BlobPosition> aggregate(cv::Mat& votes, cv::Mat& scales, std::string
         }
     }
 
-    std::vector<BlobPosition> actual;
+    std::vector<Blob> actual;
 
     for (int i=0; i<howmany-1; i++) {
         if (blobs[i].confidence >= context["MIN_HOUGH_VOTES"]) {

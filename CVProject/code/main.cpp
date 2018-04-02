@@ -91,7 +91,7 @@ int main(int argc, char** argv){
     testmodel->build(alg, true);
     testrotated->build(alg);
 
-    auto ghttest = GHTMatch(testmodel, testrotated, *alg);
+    auto ghttest = _ghtmatch(testmodel, testrotated, *alg);
     for (auto blob : ghttest) {
         if (blob.confidence >= context["MIN_HOUGH_VOTES"]) {
             std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:"
@@ -107,11 +107,11 @@ int main(int argc, char** argv){
 
 
 
-    auto multi = GHTMultiMatch(model_references, scene, *alg);
+    auto multi = GHTMatch(model_references, scene, *alg);
     for (auto match : multi) {
         auto ghtmatch = match.second;
         std::string modelname = match.first;
-        //auto ghtmatch = GHTMatch(model_references[TEST_MODEL], scene, *alg);
+        //auto ghtmatch = _ghtmatch(model_references[TEST_MODEL], scene, *alg);
         //std::cout << "Looking for " << model_references[TEST_MODEL]->path << "\n\n";
         std::cout << "\nLooking for " << modelname << "\n";
 

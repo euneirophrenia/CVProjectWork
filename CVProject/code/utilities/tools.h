@@ -181,6 +181,10 @@ int indexOf(T elem, std::vector<T> vec) {
     return -1;
 }
 
+double distance(cv::Point a, cv::Point b) {
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+}
+
 
 std::string fileName(const std::string& str, bool withoutExtension = false)
 {
