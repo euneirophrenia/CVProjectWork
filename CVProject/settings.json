@@ -6,7 +6,7 @@
   "SCENES_PATH"  : "../CVProject/scenes",
 
   "MIN_MATCHES" : 50, // to state that an object has been found, in the basic algorithm
-  "THRESHOLD"  : 0.65, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
+  "THRESHOLD"  : 0.7, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
 
   "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just to not have some random exceptions when trying to load a directory of images, you know..
 
@@ -14,11 +14,11 @@
   "FLANN_SEARCH_ITERATIONS" : 50, // how many times perform checks on the trees (the higher, the slower but better results)
 
   //parameters used in the initial blur
-  "GAUSSIAN_KERNEL_SIZE" : [5,5], // width x height, must be odd numbers (ask opencv why)
-  "GAUSSIAN_X_SIGMA" : 0.5,
-  "GAUSSIAN_Y_SIGMA" : 0.5,
+  "GAUSSIAN_KERNEL_SIZE" : [3,3], // width x height, must be odd numbers (ask opencv why)
+  "GAUSSIAN_X_SIGMA" : 1.5,
+  "GAUSSIAN_Y_SIGMA" : 1.5,
 
-  "MIN_HOUGH_VOTES" : 10,
+  "MIN_HOUGH_VOTES" : 50,
   "MAX_DISTANCE" : 20,
 
 

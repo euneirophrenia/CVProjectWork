@@ -318,8 +318,8 @@ std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models
         estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
         estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
 
-        if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > votes[match.imgIdx].cols ||
-            estimated_bary.y > votes[match.imgIdx].rows)
+        if (estimated_bary.x < scale/2 || estimated_bary.y < scale/2 ||
+            estimated_bary.x > votes[match.imgIdx].cols - scale/2 || estimated_bary.y > votes[match.imgIdx].rows - scale/2)
         {
             std::cerr << "Ignoring " << estimated_bary << "\n";
             //todo:: make it ~rubberband on the border, it may still provide useful insights
@@ -329,7 +329,7 @@ std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models
         for (int x = int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
             for (int y = int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
                 auto dist = (estimated_bary.x - x)*(estimated_bary.x - x) + (estimated_bary.y - y)*(estimated_bary.y - y);
-                votes[match.imgIdx].at<float>(y,x) += 1*exp(-dist/8.0) ;
+                votes[match.imgIdx].at<float>(y,x) += exp(-dist/8.0) ;
                 scales[match.imgIdx].at<float>(y,x) += models[match.imgIdx]->keypoints[match.trainIdx].size / scale;
             }
         }
@@ -355,9 +355,18 @@ std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models
 
                 if (allblobs[k].confidence < blob.confidence && dist <= context["MAX_DISTANCE"]) {
                     indicesToRemove.push_back(k);
-                    std::cerr << "[PRUNING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
-                              allblobs[k].confidence << ") in favor of " << blob.modelName << " (" << blob.position << ", " <<
-                             blob.confidence << ") - " << dist << "\n";
+                    if (blob.modelName == allblobs[k].modelName) {
+                        std::cerr << "[ASSIMILATING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
+                                  allblobs[k].confidence << ") in favor of " << blob.modelName << " (" << blob.position << ", " <<
+                                  blob.confidence << " ) - " << dist << "\n";
+                        blob += allblobs[k];
+                    }
+                    else {
+                        std::cerr << "[PRUNING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
+                                  allblobs[k].confidence << ") in favor of " << blob.modelName << " (" << blob.position
+                                  << ", " <<
+                                  blob.confidence << " ) - " << dist << "\n";
+                    }
                 }
             }
 

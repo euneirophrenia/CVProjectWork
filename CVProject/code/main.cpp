@@ -4,8 +4,11 @@
 
 #include "processing/matching.h"
 
-#define TEST_SCENE "scenes/h2.jpg"
+#define TEST_SCENE "scenes/m1.png"
 #define TEST_MODEL 1
+
+#include <chrono>
+#include "processing/InfiniteMatrix.h"
 
 
 //TODO: create a ~factory to make it easy to select algorithm and parameters
@@ -50,7 +53,8 @@ int main(int argc, char** argv){
     }
 
 
-    uniform(model_references, true);
+    uniform(model_references, true); //also smoothing
+    //uniform(model_references, false);  // without smoothing
 
     for (auto m : model_references){
         m->build(alg, true);
@@ -105,9 +109,15 @@ int main(int argc, char** argv){
 
     exit(1);*/
 
-
+    auto now = std::chrono::high_resolution_clock::now();
 
     auto multi = GHTMatch(model_references, scene, *alg);
+
+    std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
+
+
+    std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds \n";
+
     for (auto match : multi) {
         auto ghtmatch = match.second;
         std::string modelname = match.first;

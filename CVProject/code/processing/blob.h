@@ -31,6 +31,18 @@ struct Blob {
         return ! (*this == other);
     }
 
+    Blob operator += (Blob& other) {
+        if (other.modelName != this->modelName)
+            return *this;
+
+        this->position = (this->confidence*this->position + other.confidence*other.position)/(this->confidence+other.confidence);
+        this->area += other.area;
+        this->scale += (this->confidence * this->scale + other.confidence*other.scale) / (this->confidence + other.confidence);
+        this->confidence += other.confidence;
+
+        return *this;
+    }
+
 };
 
 
