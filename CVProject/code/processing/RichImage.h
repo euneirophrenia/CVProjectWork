@@ -19,6 +19,7 @@
 
 const Context& context = Context::getInstance();
 
+
 struct RichImage {
     std::string path;
     cv::Mat image;
@@ -80,6 +81,35 @@ struct RichImage {
 
         /// backwards compatibility, I initially didn't account for
         explicit RichImage() {}
+
+        void GaussianBlur(cv::Size kernelSize = context.GAUSSIAN_KERNEL_SIZE, float xsigma = context.GAUSSIAN_X_SIGMA, float ysigma = context.GAUSSIAN_Y_SIGMA) {
+            cv::Mat rescaled;
+            cv::GaussianBlur(this->image, rescaled, kernelSize, xsigma, ysigma);
+            this->image = rescaled;
+        }
+
+        void deBlur(bool fast=false) {
+
+            if (fast) {
+                cv::Mat temp;
+                cv::GaussianBlur(image, temp, cv::Size(0, 0), 3);
+                cv::addWeighted(image, 1.5, temp, -0.5, 0, image);
+                return;
+            }
+
+            cv::Mat blurred;
+            double sigma = 1, threshold = 5, amount = 1;
+            cv::GaussianBlur(image, blurred, cv::Size(), sigma, sigma);
+            cv::Mat lowConstrastMask = cv::abs(image - blurred) < threshold;
+            cv::Mat sharpened = image*(1+amount) + blurred*(-amount);
+            image.copyTo(sharpened, lowConstrastMask);
+            image = sharpened;
+        }
+
+        void sharpen() {
+            std::vector<float> kernel({-1, -1, -1, -1, 9, -1, -1, -1, -1});
+            cv::filter2D(image, image, image.depth(), kernel);
+        }
 
         ///return the lenght (more or less) of the longest vertical line
         // it is a (very) rough estimation of the size of the objects in the scene, it's a quantity proportional to that

@@ -23,7 +23,7 @@ int main(int argc, char** argv){
     }
 
     /// setup the algorithm
-    auto detector = cv::xfeatures2d::SIFT::create(); //(0, 6, 0.04, 21);
+    auto detector = cv::xfeatures2d::SIFT::create(); //(0, 3, 0.04, 15);
     //auto detector = cv::xfeatures2d::SURF::create(context["SURF_MIN_HESSIAN"]);
     //auto detector = cv::BRISK::create((int)context["BRISK_THRESHOLD"], (int)context["BRISK_OCTAVES"], (float)context["BRISK_PATTERNSCALE"]);
     //auto detector = cv::ORB::create();
@@ -53,6 +53,8 @@ int main(int argc, char** argv){
     auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
 
     auto now = std::chrono::high_resolution_clock::now();
+
+    scene->deBlur(false);
 
     scene -> build(alg);
     int approx_scale = scene->approximateScale();
@@ -113,8 +115,8 @@ int main(int argc, char** argv){
 
     exit(1);*/
 
-    //auto multi = GHTMatch(model_references, scene, *alg);
-    auto multi = FastGHTMatch(model_references, scene, *alg);
+    auto multi = GHTMatch(model_references, scene, *alg);
+    //auto multi = FastGHTMatch(model_references, scene, *alg);
 
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
 
