@@ -26,19 +26,22 @@ struct RichImage {
     cv::Mat features;
     std::vector<cv::Vec2d> houghModel;
 
-    void buildHoughModel() {
-        ///find barycenter
-        cv::Point2f bary;
-        for (auto kp : this->keypoints) {
-            bary += kp.pt;
-        }
-        bary.x /= this->keypoints.size();
-        bary.y /= this->keypoints.size();
+    private:
+        int _scale = -1;
 
-        for (auto kp : this -> keypoints){
-            this->houghModel.push_back(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y) / kp.size);
+        void buildHoughModel() {
+            ///find barycenter
+            cv::Point2f bary;
+            for (auto kp : this->keypoints) {
+                bary += kp.pt;
+            }
+            bary.x /= this->keypoints.size();
+            bary.y /= this->keypoints.size();
+
+            for (auto kp : this -> keypoints){
+                this->houghModel.push_back(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y) / kp.size);
+            }
         }
-    }
 
     public:
 
@@ -77,6 +80,29 @@ struct RichImage {
 
         /// backwards compatibility, I initially didn't account for
         explicit RichImage() {}
+
+        ///return the lenght (more or less) of the longest vertical line
+        // it is a (very) rough estimation of the size of the objects in the scene, it's a quantity proportional to that
+        int approximateScale() {
+            if (_scale < 0) {
+                cv::Mat edges;
+
+                cv::Canny(this->image, edges, 50, 150);
+                std::vector<cv::Vec4i> lines;
+                cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 50, 2, 5);
+
+                _scale = 0;
+                for (size_t i = 0; i < lines.size(); i++) {
+                    cv::Vec4i l = lines[i];
+                    if (l[0] == l[2]) {
+                        if (abs(l[1] - l[3]) > _scale)
+                            _scale = abs(l[1] - l[3]);
+                    }
+                }
+            }
+
+            return 2*_scale;
+        }
 
 
 };

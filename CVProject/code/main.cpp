@@ -3,16 +3,13 @@
 //
 
 #include "processing/matching.h"
-
-#define TEST_SCENE "scenes/m1.png"
-#define TEST_MODEL 1
-
 #include <chrono>
-#include "processing/InfiniteMatrix.h"
 
+//#include "processing/InfiniteMatrix.h"
 
-//TODO: create a ~factory to make it easy to select algorithm and parameters
-//todo: change some scripted params with the context ones
+#define TEST_SCENE "scenes/h4.jpg"
+//#define TEST_MODEL 1
+
 
 
 int main(int argc, char** argv){
@@ -26,7 +23,7 @@ int main(int argc, char** argv){
     }
 
     /// setup the algorithm
-    auto detector = cv::xfeatures2d::SIFT::create();
+    auto detector = cv::xfeatures2d::SIFT::create(); //(0, 6, 0.04, 21);
     //auto detector = cv::xfeatures2d::SURF::create(context["SURF_MIN_HESSIAN"]);
     //auto detector = cv::BRISK::create((int)context["BRISK_THRESHOLD"], (int)context["BRISK_OCTAVES"], (float)context["BRISK_PATTERNSCALE"]);
     //auto detector = cv::ORB::create();
@@ -52,31 +49,36 @@ int main(int argc, char** argv){
         model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
     }
 
-
-    uniform(model_references, true); //also smoothing
-    //uniform(model_references, false);  // without smoothing
-
-    for (auto m : model_references){
-        m->build(alg, true);
-    }
-
-    //auto model = Images.getOrElse(context.BASE_PATH + "models/0.jpg", load(cv::IMREAD_GRAYSCALE));
     auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
     scene -> build(alg);
 
     auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
 
+    int approx_scale = scene->approximateScale();
 
-    std::cout <<"Scene: " << scene->path << ":\n";
+
+    uniform(model_references, true, approx_scale); //also smoothing
+    //uniform(model_references, false, approx_scale);  // without smoothing
+
+    for (auto m : model_references){
+        m->build(alg, true);
+    }
+
+    /*
+     * //auto model = Images.getOrElse(context.BASE_PATH + "models/0.jpg", load(cv::IMREAD_GRAYSCALE));
 
 
-    /*auto time = funcTime(multiMatch, model_references, scene, detector, matcher);
+
+    //std::cout <<"Scene: " << scene->path << ":\n";
+
+
+    auto time = funcTime(multiMatch, model_references, scene, detector, matcher);
     std::cout << "First scan done in " << time << "ns\n";
 
     time = funcTime(multiMatch, model_references, scene, detector, matcher);
-    std::cout << "Second scan done in " << time << "ns\n";*/
+    std::cout << "Second scan done in " << time << "ns\n";
 
-    /*auto multi = multiMatch(model_references, scene, *alg);
+    auto multi = multiMatch(model_references, scene, *alg);
 
     //todo:: try to match from the image to the model, instead of the contrary, since there are many instances of one model
 
@@ -86,9 +88,9 @@ int main(int argc, char** argv){
             auto at = showMatches(*m, *scene, multi[m]);
             std::cout << "\tModel " << m->path << " found at " << at << " (" << multi[m].size() << "/" <<context.MIN_MATCHES << ")\n";
         }
-    }*/
+    }
 
-    /*auto testmodel = new RichImage("../CVProject/models/6.jpg");
+    auto testmodel = new RichImage("../CVProject/models/6.jpg");
     cv::Mat testcolor = cv::imread("../CVProject/models/6-1.jpg", cv::IMREAD_COLOR);
     auto testrotated = new RichImage("../CVProject/models/6-1.jpg");
 
@@ -115,7 +117,6 @@ int main(int argc, char** argv){
 
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
 
-
     std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds \n";
 
     for (auto match : multi) {
@@ -127,7 +128,8 @@ int main(int argc, char** argv){
 
         if (!ghtmatch.empty()) {
             for (auto blob : ghtmatch) {
-                std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:" << blob.area << ")\n";
+                std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea: " << blob.area << ",\tscale: " <<
+                blob.scale << ")\n";
                 //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
 
                 cv::putText(colorscene, ids[blob.modelName], blob.position,

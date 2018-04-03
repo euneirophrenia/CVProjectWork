@@ -171,6 +171,37 @@ cv::Mat diffuse(cv::Mat in, int side,  double sigmax, double sigmay, double gain
 
 }
 
+/**
+ * Algorithm to extract the skeleton of an image.
+ * Credits http://felix.abecassis.me/2011/09/opencv-morphological-skeleton/
+ * @param src the input image
+ * @return the skeleton image
+ */
+cv::Mat skeleton(cv::Mat src) {
+
+    cv::Mat img;
+    cv::threshold(src, img, 127, 255, cv::THRESH_BINARY);
+    cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
+    cv::Mat temp;
+    cv::Mat eroded;
+
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+
+    bool done;
+    do {
+        cv::erode(img, eroded, element);
+        cv::dilate(eroded, temp, element); // temp = open(img)
+        cv::subtract(img, temp, temp);
+        cv::bitwise_or(skel, temp, skel);
+        eroded.copyTo(img);
+
+        done = (cv::countNonZero(img) == 0);
+    } while (!done);
+
+    return skel;
+
+}
+
 template<typename T>
 int indexOf(T elem, std::vector<T> vec) {
     for (int i=0; i< vec.size(); i++) {

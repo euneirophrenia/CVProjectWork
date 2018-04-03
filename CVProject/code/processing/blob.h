@@ -45,8 +45,6 @@ struct Blob {
 
 };
 
-
-
 std::vector<cv::KeyPoint> simpleBlob(cv::Mat& in) {
     auto detector = cv::SimpleBlobDetector::create();
     std::vector<cv::KeyPoint> keypoints;

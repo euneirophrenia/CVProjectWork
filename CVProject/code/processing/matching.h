@@ -119,13 +119,20 @@ cv::Point2d showMatches(RichImage model, RichImage sceneImage, std::vector<cv::D
 }
 
 /// unify all models size and blur, so that more or less everything is at the same resolution
-void uniform(std::vector<RichImage*> models, bool andBlur=false) {
+void uniform(std::vector<RichImage*> models, bool andBlur=false, int approximate_scale = -1) {
 
-    cv::Size minimum = models[0]->image.size();
+    cv::Size minimum;
+    if (approximate_scale < 0) {
+        minimum = models[0]->image.size();
 
-    for (auto image : models) {
-        if (image->image.size().area() < minimum.area())
-            minimum = image->image.size();
+        for (auto image : models) {
+            if (image->image.size().area() < minimum.area())
+                minimum = image->image.size();
+        }
+    }
+
+    else {
+        minimum.height = approximate_scale;
     }
 
     /// rescale each image so that its height matches the minimum one
@@ -289,6 +296,8 @@ std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models
     std::vector<cv::Mat> modelfeats;
 
     for (auto model : models) {
+        if (model->features.empty())
+            model->build(&algo, true);
         modelfeats.push_back(model->features);
     }
 
@@ -357,7 +366,7 @@ std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models
                     indicesToRemove.push_back(k);
                     if (blob.modelName == allblobs[k].modelName) {
                         std::cerr << "[ASSIMILATING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
-                                  allblobs[k].confidence << ") in favor of " << blob.modelName << " (" << blob.position << ", " <<
+                                  allblobs[k].confidence << ") with " << blob.modelName << " (" << blob.position << ", " <<
                                   blob.confidence << " ) - " << dist << "\n";
                         blob += allblobs[k];
                     }
