@@ -196,7 +196,7 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
     return res;
 }
 
-/*
+
 std::vector<Blob> _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo) {
 
     cv::Mat votes = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
@@ -226,7 +226,8 @@ std::vector<Blob> _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo) 
         estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
         estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
 
-        if (estimated_bary.x <0 || estimated_bary.y < 0 || estimated_bary.x > votes.cols || estimated_bary.y > votes.rows) {
+        if (estimated_bary.x < scale/2 || estimated_bary.y < scale/2 ||
+            estimated_bary.x > votes.cols - scale/2  || estimated_bary.y > votes.rows - scale/2) {
             std::cerr << "Ignoring " << estimated_bary << "\n";
             //todo:: make it ~rubberband on the border, it may still provide useful insights
             continue;
@@ -235,7 +236,7 @@ std::vector<Blob> _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo) 
         for (int x = int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
             for (int y = int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
                 auto dist = (estimated_bary.x - x)*(estimated_bary.x - x) + (estimated_bary.y - y)*(estimated_bary.y - y);
-                votes.at<float>(y,x) += 1.5*exp(-dist/5.0) ;
+                votes.at<float>(y,x) += exp(-dist/8.0) ;
                 scales.at<float>(y,x) += model->keypoints[match.trainIdx].size / scale;
             }
         }
@@ -245,49 +246,69 @@ std::vector<Blob> _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo) 
     return aggregate(votes, scales, model->path);
 }
 
-std::map<std::string, std::vector<Blob>> _GHTMultiMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage *> models, RichImage *scene, Algorithm algo) {
 
     std::map<std::string, std::vector<Blob>> res;
-    std::vector<Blob> blobs, temp;
-
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
+    for (auto model : models) {
+        if (model->features.empty())
+            model->build(&algo, true);
+    }
 
 
+    std::vector<Blob> allblobs;
+    std::vector<size_t> indicesToRemove;
     for (int i=0; i<models.size(); i++){
         res[models[i]->path] = std::vector<Blob>();
 
         auto matches = _ghtmatch(models[i], scene, algo);
 
-        for (int mi = 0; mi < matches.size(); mi++) {
-            bool placed=false;
-            for (int bi = 0; bi < blobs.size(); bi++) {
+        for (auto blob : matches) {
+            indicesToRemove.clear();
+            bool best=true;
 
-                if ((matches[mi].confidence > blobs[bi].confidence) &&
-                    (cv::norm(blobs[bi].position - matches[mi].position) <= context["MAX_DISTANCE"])) {
-                    blobs[bi] = matches[mi];
-                    placed=true;
+            for (int k =0; k<allblobs.size() && best; k++){
+                double dist = distance(allblobs[k].position, blob.position);
+                if (allblobs[k].confidence >= blob.confidence &&  dist <= scene->approximateScale()/4) {
+                    best = false;
+                }
+
+                if (allblobs[k].confidence < blob.confidence && dist <= scene->approximateScale()/4) {
+                    indicesToRemove.push_back(k);
+                    if (blob.modelName == allblobs[k].modelName) {
+                        std::cerr << "[ASSIMILATING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
+                                  allblobs[k].confidence << ") with " << blob.modelName << " (" << blob.position << ", " <<
+                                  blob.confidence << " ) - " << dist << "\n";
+                        blob += allblobs[k];
+                    }
+                    else {
+                        std::cerr << "[PRUNING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<
+                                  allblobs[k].confidence << ") in favor of " << blob.modelName << " (" << blob.position
+                                  << ", " <<
+                                  blob.confidence << " ) - " << dist << "\n";
+                    }
                 }
             }
 
-            if (!placed)
-                blobs.push_back(matches[mi]);
+            if (best)
+                allblobs.push_back(blob);
 
-            }
-
+            allblobs = erase_indices(allblobs, indicesToRemove);
         }
 
-    for (auto blob : blobs) {
-        if (indexOf<Blob>(blob, res[blob.modelName]) < 0)
-            res[blob.modelName].push_back(blob);
     }
+
+    for (auto blob: allblobs) {
+        res[blob.modelName].push_back(blob);
+    }
+
 
     return res;
 }
-*/
 
-std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models, RichImage* scene, Algorithm algo) {
+std::map<std::string, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> models, RichImage *scene, Algorithm algo) {
     std::map<std::string, std::vector<Blob>> res;
 
     if (scene->keypoints.empty())
@@ -358,11 +379,11 @@ std::map<std::string, std::vector<Blob>> GHTMatch(std::vector<RichImage*> models
 
             for (int k =0; k<allblobs.size() && best; k++){
                 double dist = distance(allblobs[k].position, blob.position);
-                if (allblobs[k].confidence >= blob.confidence &&  dist <= context["MAX_DISTANCE"]) {
+                if (allblobs[k].confidence >= blob.confidence &&  dist <= scene->approximateScale()/4) {
                     best = false;
                 }
 
-                if (allblobs[k].confidence < blob.confidence && dist <= context["MAX_DISTANCE"]) {
+                if (allblobs[k].confidence < blob.confidence && dist <= scene->approximateScale()/4) {
                     indicesToRemove.push_back(k);
                     if (blob.modelName == allblobs[k].modelName) {
                         std::cerr << "[ASSIMILATING] " << allblobs[k].modelName << " (" << allblobs[k].position << ", " <<

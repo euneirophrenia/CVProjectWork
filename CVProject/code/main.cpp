@@ -7,7 +7,7 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/h4.jpg"
+#define TEST_SCENE "scenes/h2.jpg"
 //#define TEST_MODEL 1
 
 
@@ -50,12 +50,14 @@ int main(int argc, char** argv){
     }
 
     auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
-    scene -> build(alg);
-
     auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
 
-    int approx_scale = scene->approximateScale();
+    auto now = std::chrono::high_resolution_clock::now();
 
+    scene -> build(alg);
+    int approx_scale = scene->approximateScale();
+    std::cerr << "[DEBUG] Scene:\t" << scene->path << "\n";
+    std::cerr << "[DEBUG] Detected scale:\t" << approx_scale << "\n";
 
     uniform(model_references, true, approx_scale); //also smoothing
     //uniform(model_references, false, approx_scale);  // without smoothing
@@ -111,9 +113,8 @@ int main(int argc, char** argv){
 
     exit(1);*/
 
-    auto now = std::chrono::high_resolution_clock::now();
-
-    auto multi = GHTMatch(model_references, scene, *alg);
+    //auto multi = GHTMatch(model_references, scene, *alg);
+    auto multi = FastGHTMatch(model_references, scene, *alg);
 
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
 
