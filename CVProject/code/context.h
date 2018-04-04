@@ -9,6 +9,8 @@
 #ifndef OPENCV_CONTEXT_H
 #define OPENCV_CONTEXT_H
 
+#define DEBUG
+
 #include <string>
 #include <vector>
 #include <sys/types.h>
