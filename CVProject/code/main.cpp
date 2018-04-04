@@ -7,7 +7,7 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/m2.png"
+#define TEST_SCENE "scenes/m3.png"
 //#define TEST_MODEL 1
 
 
@@ -132,10 +132,15 @@ int main(int argc, char** argv){
                 std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea: " << blob.area << ")\n";
                 //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
 
+
                 cv::putText(colorscene, ids[blob.model->path], blob.position,
                             cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255,250));
 
-
+                auto rect = boundingRect(blob.model, scene, blob.matches);
+                if (!rect.empty())
+                    cv::rectangle(colorscene, rect, CvScalar(0, 255, 0), 2, cv::LINE_AA);
+                else
+                    std::cout << "\t\tCould not find proper homography for: " << blob << "\n";
 
             }
         }
