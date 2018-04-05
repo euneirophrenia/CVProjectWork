@@ -7,9 +7,9 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/m3.png"
-//#define TEST_MODEL 1
+#define TEST_SCENE "scenes/e5.png"
 
+//#define FAST
 
 
 int main(int argc, char** argv){
@@ -66,7 +66,7 @@ int main(int argc, char** argv){
     std::cerr << "[DEBUG] Detected scale:\t" << approx_scale << "\n";
 #endif
 
-    uniform(model_references, true, approx_scale); //also smoothing
+    uniform(model_references, false, -1); //also smoothing
     //uniform(model_references, false, approx_scale);  // without smoothing
 
     for (auto m : model_references){
@@ -74,48 +74,11 @@ int main(int argc, char** argv){
         m->build(alg, true);
     }
 
-     //auto model = Images.getOrElse(context.BASE_PATH + "models/0.jpg", load(cv::IMREAD_GRAYSCALE));
-
-
-
-    //std::cout <<"Scene: " << scene->path << ":\n";
-
-
-
-    /*auto multim = multiMatch(model_references, scene, *alg, false);
-
-
-    for (auto m : model_references) {
-        if (multim[m].size() > context.MIN_MATCHES) {
-            auto at = localizeMatches(*m, *scene, multim[m], CvScalar(0,255,0), false);
-            std::cout << "\tModel " << m->path << " found at " << at << " (" << multim[m].size() << "/" <<context.MIN_MATCHES << ")\n";
-        }
-    }*/
-
-
-    /*auto testmodel = new RichImage("../CVProject/models/6.jpg");
-    cv::Mat testcolor = cv::imread("../CVProject/models/6-1.jpg", cv::IMREAD_COLOR);
-    auto testrotated = new RichImage("../CVProject/models/6-1.jpg");
-
-    testmodel->build(alg, true);
-    testrotated->build(alg);
-
-    auto ghttest = _ghtmatch(testmodel, testrotated, *alg);
-    for (auto blob : ghttest) {
-        if (blob.confidence >= context["MIN_HOUGH_VOTES"]) {
-            std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea:"
-                                                 << blob.area << ")\n";
-            cv::drawMarker(testcolor, blob.position, CvScalar(255, 255, 255));
-        }
-    }
-
-    cv::imshow("test hough", testcolor);
-    cv::waitKey(0);
-
-    exit(1);*/
-
-    //auto multi = GHTMatch(model_references, scene, *alg);
+#ifndef FAST
+    auto multi = GHTMatch(model_references, scene, *alg);
+#else
     auto multi = FastGHTMatch(model_references, scene, *alg);
+#endif
 
 #ifdef DEBUG
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;

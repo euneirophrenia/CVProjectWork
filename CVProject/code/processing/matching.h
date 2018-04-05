@@ -15,7 +15,7 @@
 #include "blob.h"
 
 
-std::vector<cv::DMatch> findKnn(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher *matcher,
+std::vector<cv::DMatch> findKnn(cv::Mat &targetFeatures, cv::Mat &modelFeatures, cv::DescriptorMatcher *matcher,
                                 float threshold = 0.7, bool andFilter=true) {
 
     std::vector<std::vector<cv::DMatch>> matches;
@@ -251,61 +251,28 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
 }
 
 
-std::vector<Blob> _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo) {
+void _ghtmatch(RichImage *model, RichImage *scene, Algorithm algo, VotingMatrix* votes) {
 
-    cv::Mat votes = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
-    cv::Mat scales = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
-
-    if (scene->keypoints.empty())
-        algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
-
-    if (model->keypoints.empty())
-        algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
+    if (model->keypoints.empty()) {
+        model->build(&algo, true);
+    }
 
 
     std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo.matcher, context["THRESHOLD"], true);
 
-
     for (auto match : matches) {
-        double scale = scene->keypoints[match.queryIdx].size;
-        double angle = scene->keypoints[match.queryIdx].angle - model->keypoints[match.trainIdx].angle;
-
-        cv::Point2d scenept = scene->keypoints[match.queryIdx].pt;
-        cv::Point2d estimated_bary;
-        cv::Vec2d houghmodel = model->houghModel[match.trainIdx];
-
-
-        houghmodel = rotate(houghmodel, angle);
-
-        estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
-        estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
-
-        if (estimated_bary.x < scale/2 || estimated_bary.y < scale/2 ||
-            estimated_bary.x > votes.cols - scale/2  || estimated_bary.y > votes.rows - scale/2) {
-            std::cerr << "Ignoring " << estimated_bary << "\n";
-            //todo:: make it ~rubberband on the border, it may still provide useful insights
-            continue;
-        }
-
-        for (int x = int(estimated_bary.x - scale/2); x<= int(estimated_bary.x + scale/2); x++) {
-            for (int y = int(estimated_bary.y - scale/2); y<= int(estimated_bary.y + scale/2); y++) {
-                auto dist = (estimated_bary.x - x)*(estimated_bary.x - x) + (estimated_bary.y - y)*(estimated_bary.y - y);
-                votes.at<float>(y,x) += exp(-dist/8.0) ;
-                scales.at<float>(y,x) += model->keypoints[match.trainIdx].size / scale;
-            }
-        }
-
+        votes->castVote(match, model);
     }
 
-    return aggregate(votes, model);
 }
 
 std::map<RichImage*, std::vector<Blob>> GHTMatch(std::vector<RichImage *> models, RichImage *scene, Algorithm algo) {
 
-    std::map<RichImage*, std::vector<Blob>> res;
+    VotingMatrix res(scene);
 
     if (scene->keypoints.empty())
         algo.detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
+
     for (auto model : models) {
         if (model->features.empty())
             model->build(&algo, true);
@@ -314,55 +281,19 @@ std::map<RichImage*, std::vector<Blob>> GHTMatch(std::vector<RichImage *> models
 
     std::vector<Blob> allblobs;
     std::vector<size_t> indicesToRemove;
-    for (int i=0; i<models.size(); i++){
-        res[models[i]] = std::vector<Blob>();
-
-        auto matches = _ghtmatch(models[i], scene, algo);
-
-        for (auto blob : matches) {
-            indicesToRemove.clear();
-            bool best=true;
-
-            for (int k =0; k<allblobs.size() && best; k++){
-                double dist = distance(allblobs[k].position, blob.position);
-                if (allblobs[k].confidence >= blob.confidence &&  dist <= scene->approximateScale()/4) {
-                    best = false;
-                }
-
-                if (allblobs[k].confidence < blob.confidence && dist <= scene->approximateScale()/4) {
-                    indicesToRemove.push_back(k);
-                    if (blob.model == allblobs[k].model) {
-                        std::cerr << "[ASSIMILATING] " << allblobs[k].model->path << " (" << allblobs[k].position << ", " <<
-                                  allblobs[k].confidence << ") with " << blob.model->path << " (" << blob.position << ", " <<
-                                  blob.confidence << " ) - " << dist << "\n";
-                        blob += allblobs[k];
-                    }
-                    else {
-                        std::cerr << "[PRUNING] " << allblobs[k].model->path << " (" << allblobs[k].position << ", " <<
-                                  allblobs[k].confidence << ") in favor of " << blob.model->path << " (" << blob.position
-                                  << ", " <<
-                                  blob.confidence << " ) - " << dist << "\n";
-                    }
-                }
-            }
-
-            if (best)
-                allblobs.push_back(blob);
-
-            allblobs = erase_indices(allblobs, indicesToRemove);
-        }
-
+    for (int i=0; i<models.size(); i++) {
+        _ghtmatch(models[i], scene, algo, &res);
     }
 
-    for (auto blob: allblobs) {
-        res[blob.model].push_back(blob);
-    }
+    res.collapse(scene->approximateScale()/9);
+    res.prune(scene-> approximateScale()/2);
+    res.relativeFilter(0.5);
 
-
-    return res;
+    return res.asMap();
 }
 
 std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> models, RichImage *scene, Algorithm algo) {
+
     VotingMatrix res(scene);
 
     if (scene->keypoints.empty())
@@ -393,8 +324,8 @@ std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> mo
     }
 
     res.collapse(scene->approximateScale()/9);
-    res.filter(0.5);
-    res.prune(scene-> approximateScale()/1.5);
+    res.prune(scene-> approximateScale()/2);
+    res.relativeFilter(0.5);
 
     return res.asMap();
 

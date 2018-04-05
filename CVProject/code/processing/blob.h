@@ -34,7 +34,6 @@ struct Blob {
             return *this;
         }
 
-
         this->position = (this->confidence*this->position + other.confidence*other.position)/(this->confidence+other.confidence);
         this->area += other.area;
         this->confidence += other.confidence;
@@ -139,7 +138,7 @@ struct VotingMatrix {
 
                     if (blob.position.x < collapsingDistance/2 || blob.position.y < collapsingDistance/2 ||
                             blob.position.x > votes.cols - collapsingDistance/2 || blob.position.y > votes.rows - collapsingDistance/2) {
-                        std::cerr << "[IGNORING] " << blob.position << "\n";
+                        std::cerr << "[IGNORING] " << blob << "\n";
                         continue;
                     }
 
@@ -182,11 +181,13 @@ struct VotingMatrix {
                 }
 
                 for (auto b : pair.second) {
-                    int label = labels.at<int>(b.position);
-                    if (label == 0) {
-                        continue;
+                    if (scene->contains(b.position)) {
+                        int label = labels.at<int>(b.position);
+                        if (label == 0) {
+                            continue;
+                        }
+                        compacted[label - 1] += b;
                     }
-                    compacted[label-1] += b;
                 }
 
                 blobs[pair.first] = compacted;
@@ -242,7 +243,7 @@ struct VotingMatrix {
         }
 
         ///filter out all blobs with confidence < threhsold * best_confidence within the same model
-        void filter(double threshold=0.5) {
+        void relativeFilter(double threshold = 0.5) {
             std::vector<size_t> indicesToRemove;
             for (auto pair:blobs) {
 
@@ -254,6 +255,22 @@ struct VotingMatrix {
 
                 for (size_t i=0; i < pair.second.size(); i++) {
                     if (pair.second[i].confidence < threshold * best)
+                        indicesToRemove.push_back(i);
+                }
+
+                blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
+                indicesToRemove.clear();
+            }
+
+        }
+
+        ///filter out all blobs with less than an absolute value for confidence
+        void absoluteFilter(double threshold = context["MIN_HOUGH_VOTES"]) {
+            std::vector<size_t> indicesToRemove;
+            for (auto pair:blobs) {
+
+                for (size_t i=0; i < pair.second.size(); i++) {
+                    if (pair.second[i].confidence < threshold)
                         indicesToRemove.push_back(i);
                 }
 

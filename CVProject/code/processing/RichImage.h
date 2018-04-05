@@ -29,6 +29,7 @@ struct RichImage {
 
     private:
         int _scale = -1;
+        cv::Rect image_rect;
 
         void buildHoughModel() {
             ///find barycenter
@@ -77,6 +78,7 @@ struct RichImage {
         explicit RichImage(std::string path, int mode = cv::IMREAD_GRAYSCALE) {
             this->path = path;
             this->image = cv::imread(path, mode);
+            this->image_rect = cv::Rect(cv::Point(0,0), image.size());
         }
 
         /// backwards compatibility, I initially didn't account for
@@ -109,6 +111,10 @@ struct RichImage {
         void sharpen() {
             std::vector<float> kernel({-1, -1, -1, -1, 9, -1, -1, -1, -1});
             cv::filter2D(image, image, image.depth(), kernel);
+        }
+
+        bool contains(cv::Point p) {
+            return image_rect.contains(p);
         }
 
         ///return the lenght (more or less) of the longest vertical line

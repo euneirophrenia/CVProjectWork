@@ -5258,7 +5258,7 @@ class binary_reader
                 return get_number<double>();
             }
 
-            default: // anything else (0xFF is handled inside the other types)
+            default: // anything else (0xFF is handled contains the other types)
             {
                 std::stringstream ss;
                 ss << std::setw(2) << std::uppercase << std::setfill('0') << std::hex << current;

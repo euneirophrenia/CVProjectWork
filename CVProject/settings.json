@@ -22,8 +22,8 @@
 
 
 
-
-
+  // ALGORITHMS PARAMETERS
+  "SURF_MIN_HESSIAN" : 400.0, // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
   "BRISK_THRESHOLD" : 60,
   "BRISK_OCTAVES" : 4,
   "BRISK_PATTERNSCALE" : 1.0,
@@ -31,10 +31,6 @@
 
   "LSH_INDEX_TABLES" : 20, // for BRISK/ORB + knnSearch of the Flann matcher
   "LSH_INDEX_KEY_SIZE" : 10, // '' '' '' ''
-  "LSH_INDEX_MULTIPROBE_LEVEL" : 2, // '' '' '' '' ''
-
-  // ALGORITHMS PARAMETERS
-  "SURF_MIN_HESSIAN" : 400.0 // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
-
+  "LSH_INDEX_MULTIPROBE_LEVEL" : 2 // '' '' '' '' ''
 
 }
