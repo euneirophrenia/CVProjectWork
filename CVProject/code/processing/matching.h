@@ -154,8 +154,8 @@ cv::Point2d localizeMatches(RichImage model, RichImage sceneImage, std::vector<c
     return 0.5*(rect.br() + rect.tl());
 }
 
-/// unify all models size and blur, so that more or less everything is at the same resolution
-void uniform(std::vector<RichImage*> models, bool andBlur=false, int approximate_scale = -1) {
+/// unify all models size and blur if needed, so that more or less everything is at the same resolution
+void uniform(std::vector<RichImage*> models,  int approximate_scale = -1) {
 
     cv::Size minimum;
     if (approximate_scale < 0) {
@@ -177,7 +177,7 @@ void uniform(std::vector<RichImage*> models, bool andBlur=false, int approximate
         float factor = 1.0f * minimum.height / image->image.size().height  ;
         cv::Mat rescaled;
 
-        if (andBlur)
+        if (factor < 1)
             GaussianBlur(image->image, rescaled, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
         else {
             rescaled = image->image;
@@ -285,9 +285,23 @@ std::map<RichImage*, std::vector<Blob>> GHTMatch(std::vector<RichImage *> models
         _ghtmatch(models[i], scene, algo, &res);
     }
 
-    res.collapse(scene->approximateScale()/9);
+    res.collapse(scene->approximateScale()/10);
+
+    float total_conf = 0;
+    int total = 0;
+
+    for (auto pair : res.asMap()) {
+        for (auto blob: pair.second) {
+            total+=1;
+            total_conf+=blob.confidence;
+        }
+    }
+
+    ///filter out everything with confidence < 0.1 * mean_confidence, it is probably garbage
+    res.absoluteFilter(0.1 * total_conf/total);
+    res.relativeFilter(0.4);
+
     res.prune(scene-> approximateScale()/2);
-    res.relativeFilter(0.5);
 
     return res.asMap();
 }
@@ -324,8 +338,8 @@ std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> mo
     }
 
     res.collapse(scene->approximateScale()/9);
+    res.relativeFilter(0.4);
     res.prune(scene-> approximateScale()/2);
-    res.relativeFilter(0.5);
 
     return res.asMap();
 

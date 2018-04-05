@@ -7,7 +7,7 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/e5.png"
+#define TEST_SCENE "scenes/m2.png"
 
 //#define FAST
 
@@ -66,8 +66,8 @@ int main(int argc, char** argv){
     std::cerr << "[DEBUG] Detected scale:\t" << approx_scale << "\n";
 #endif
 
-    uniform(model_references, false, -1); //also smoothing
-    //uniform(model_references, false, approx_scale);  // without smoothing
+    uniform(model_references, -1); // automatic size decision
+    //uniform(model_references, approx_scale);  // given size
 
     for (auto m : model_references){
         //m->deBlur();

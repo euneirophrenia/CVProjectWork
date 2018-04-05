@@ -78,6 +78,8 @@ struct RichImage {
         explicit RichImage(std::string path, int mode = cv::IMREAD_GRAYSCALE) {
             this->path = path;
             this->image = cv::imread(path, mode);
+            if (this->image.empty())
+                throw std::invalid_argument("Image at " + path + " not found.");
             this->image_rect = cv::Rect(cv::Point(0,0), image.size());
         }
 

@@ -132,6 +132,7 @@ struct VotingMatrix {
         }
 
         void collapse(double collapsingDistance) {
+
             for (auto pair : blobs) {
                 cv::Mat votes = cv::Mat::zeros(scene->image.size(), CV_32F);
                 for (auto blob : pair.second) {
@@ -254,8 +255,11 @@ struct VotingMatrix {
                 }
 
                 for (size_t i=0; i < pair.second.size(); i++) {
-                    if (pair.second[i].confidence < threshold * best)
+                    if (pair.second[i].confidence < threshold * best) {
+                        std::cerr << "[RELATIVE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence/best << "/"
+                                                                                        << threshold << ")\n";
                         indicesToRemove.push_back(i);
+                    }
                 }
 
                 blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
@@ -270,8 +274,11 @@ struct VotingMatrix {
             for (auto pair:blobs) {
 
                 for (size_t i=0; i < pair.second.size(); i++) {
-                    if (pair.second[i].confidence < threshold)
+                    if (pair.second[i].confidence < threshold) {
+                        std::cerr << "[ABSOLUTE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence << "/"
+                                  << threshold << ")\n";
                         indicesToRemove.push_back(i);
+                    }
                 }
 
                 blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
@@ -287,6 +294,7 @@ struct VotingMatrix {
         std::map<RichImage*, std::vector<Blob>> asMap() {
             return this->blobs;
         }
+
 };
 
 std::vector<cv::KeyPoint> simpleBlob(cv::Mat& in) {
