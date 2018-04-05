@@ -7,7 +7,7 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/m2.png"
+#define TEST_SCENE "scenes/m3.png"
 
 //#define FAST
 
@@ -43,21 +43,29 @@ int main(int argc, char** argv){
 
     Algorithm* alg = new Algorithm(detector, matcher);
 
-    /// unify model sizes
     std::vector<RichImage*> model_references;
     for (auto& p : context.MODELS) {
-        model_references.push_back(Images.getOrElse(p, load(cv::IMREAD_GRAYSCALE)));
+        model_references.push_back(new RichImage(p, cv::IMREAD_GRAYSCALE));
     }
 
     auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
     auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
 
+    ///uniform models (with automatic setting could be done "offline")
+    uniform(model_references, -1); // automatic size decision
+    //uniform(model_references, approx_scale);  // given size
+
+    ///extract the features and also extract the ght model
+    for (auto m : model_references){
+        m->build(alg, true);
+    }
+
 #ifdef DEBUG
     auto now = std::chrono::high_resolution_clock::now();
 #endif
 
+    ///preprocess the scene
     scene->deBlur(false);
-
     scene -> build(alg);
     int approx_scale = scene->approximateScale();
 
@@ -66,18 +74,12 @@ int main(int argc, char** argv){
     std::cerr << "[DEBUG] Detected scale:\t" << approx_scale << "\n";
 #endif
 
-    uniform(model_references, -1); // automatic size decision
-    //uniform(model_references, approx_scale);  // given size
+    auto ghtmatcher = new GHTMatcher(scene);
 
-    for (auto m : model_references){
-        //m->deBlur();
-        m->build(alg, true);
-    }
-
-#ifndef FAST
-    auto multi = GHTMatch(model_references, scene, *alg);
+#ifdef FAST
+    auto multi = ghtmatcher->FastGHTMatch(model_references, alg);
 #else
-    auto multi = FastGHTMatch(model_references, scene, *alg);
+    auto multi = ghtmatcher->GHTMatch(model_references, alg);
 #endif
 
 #ifdef DEBUG

@@ -127,7 +127,16 @@ struct VotingMatrix {
             b.area = 1;
             b.model = forModel;
 
-            blobs[forModel].push_back(b);
+            bool found = false;
+            for (int i = 0; i< blobs[forModel].size() && !found; i++) {
+                double l1norm = abs(b.position.x - blobs[forModel][i].position.x) + abs(b.position.y - blobs[forModel][i].position.y);
+                if (l1norm < 2){
+                    found = true;
+                    blobs[forModel][i]+=b;
+                }
+            }
+            if (!found)
+                blobs[forModel].push_back(b);
 
         }
 

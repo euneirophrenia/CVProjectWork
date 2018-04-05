@@ -139,19 +139,11 @@ struct RichImage {
                 }
             }
 
-            return 2*_scale;
+            return 2 * _scale;
         }
 
 
 };
-
-
-
-/**
- * Global entry point for the images. not the smartest idea but hey.
- */
-ResourcePool<std::string, RichImage> Images;
-
 
 std::function<RichImage*(std::string)> load(int flag) {
     return [=](std::string filename) {
