@@ -77,36 +77,27 @@ inline std::vector<T> erase_indices(const std::vector<T>& data, std::vector<size
     return ret;
 }
 
-//TODO: optimize this shit ASAP
-cv::Mat erase_rows(cv::Mat& data, std::vector<size_t>& indices) {
+template<typename T>
+inline void filter(std::vector<T>& data, bool* mask, std::vector<T> output) {
 
-    if(indices.empty())
-        return data;
-
-    if (indices.size() > data.rows){
-        throw std::invalid_argument("Too many indices to delete.");
-    }
-    cv::Mat res = cv::Mat::zeros(CvSize(data.cols, data.rows - indices.size()), data.type());
-
-    bool mask[data.rows];
-    for (int i=0; i< data.rows; i++) {
-        mask[i] = true;
-    }
-    for (auto i : indices) {
-        mask[i] = false;
+    for (int i=0; i< data.size(); i++) {
+        if (mask[i])
+            output.push_back(data[i]);
     }
 
-    int currentRow = 0;
-    for (int i=0; i< data.rows;i++) {
-        if (mask[i]) {
-            for (int j = 0; j < data.cols * data.channels(); j++) {
-                res.data[data.cols * data.channels() * currentRow + j] = data.data[data.cols * data.channels() * i + j];
-            }
-            currentRow++;
-        }
+}
+
+template<typename T>
+inline void filter(std::vector<T> data, bool* mask) {
+
+    std::vector<T> output;
+    for (int i=0; i< data.size(); i++) {
+        if (mask[i])
+            output.push_back(data[i]);
     }
 
-    return res;
+    data = output;
+
 }
 
 char readUntil(std::istream* in, char delim, std::function<void(char)> callback = [](char c) { }) {

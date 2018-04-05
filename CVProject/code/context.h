@@ -10,6 +10,8 @@
 #define OPENCV_CONTEXT_H
 
 #define DEBUG
+//#define FAST
+
 
 #include <string>
 #include <vector>

@@ -148,7 +148,9 @@ struct VotingMatrix {
 
                     if (blob.position.x < collapsingDistance/2 || blob.position.y < collapsingDistance/2 ||
                             blob.position.x > votes.cols - collapsingDistance/2 || blob.position.y > votes.rows - collapsingDistance/2) {
+#ifdef DEBUG
                         std::cerr << "[IGNORING] " << blob << "\n";
+#endif
                         continue;
                     }
 
@@ -262,9 +264,10 @@ struct VotingMatrix {
                     if (blob.confidence > best)
                         best = blob.confidence;
                 }
-
+#ifdef DEBUG
                 for (size_t i=0; i < pair.second.size(); i++) {
                     if (pair.second[i].confidence < threshold * best) {
+
                         std::cerr << "[RELATIVE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence/best << "/"
                                                                                         << threshold << ")\n";
                         indicesToRemove.push_back(i);
@@ -273,6 +276,10 @@ struct VotingMatrix {
 
                 blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
                 indicesToRemove.clear();
+#else
+                auto todelete = std::remove_if(blobs[pair.first].begin(), blobs[pair.first].end(), [=](Blob b) {return b.confidence < threshold*best;} );
+                blobs[pair.first].erase(todelete, blobs[pair.first].end());
+#endif
             }
 
         }
@@ -280,18 +287,25 @@ struct VotingMatrix {
         ///filter out all blobs with less than an absolute value for confidence
         void absoluteFilter(double threshold = context["MIN_HOUGH_VOTES"]) {
             std::vector<size_t> indicesToRemove;
+
             for (auto pair:blobs) {
+#ifdef DEBUG
+                for (size_t i = 0; i < pair.second.size(); i++) {
 
-                for (size_t i=0; i < pair.second.size(); i++) {
                     if (pair.second[i].confidence < threshold) {
-                        std::cerr << "[ABSOLUTE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence << "/"
-                                  << threshold << ")\n";
                         indicesToRemove.push_back(i);
+                        std::cerr << "[ABSOLUTE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence
+                                  << "/"
+                                  << threshold << ")\n";
                     }
-                }
 
-                blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
-                indicesToRemove.clear();
+                    blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
+                    indicesToRemove.clear();
+                }
+#else
+                auto todelete = std::remove_if(blobs[pair.first].begin(), blobs[pair.first].end(), [=](Blob b) {return b.confidence < threshold;} );
+                blobs[pair.first].erase(todelete, blobs[pair.first].end());
+#endif
             }
 
         }
