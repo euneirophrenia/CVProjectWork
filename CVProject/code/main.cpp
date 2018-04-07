@@ -2,7 +2,7 @@
 // Created by Marco DiVi on 27/02/18.
 //
 
-#include "processing/matching.h"
+#include "processing/GHTMatching.h"
 #include <chrono>
 
 //#include "processing/InfiniteMatrix.h"
@@ -57,6 +57,7 @@ int main(int argc, char** argv){
     for (auto m : model_references){
         m->build(alg, true);
     }
+
 
 #ifdef DEBUG
     auto now = std::chrono::high_resolution_clock::now();

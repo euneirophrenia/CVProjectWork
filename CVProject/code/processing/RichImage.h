@@ -52,11 +52,14 @@ struct RichImage {
             algo->detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
 
             /// root sift, comment out if not using sift/surf maybe
+#ifdef ROOT_SIFT
             for(int i=0; i< features.rows; ++i) {
 
                 features.row(i) = features.row(i) / cv::sum(features.row(i))[0];
                 cv::sqrt(features.row(i), features.row(i));
             }
+#endif
+
             if (andBuildHough)
                 buildHoughModel();
 

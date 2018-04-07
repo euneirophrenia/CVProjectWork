@@ -11,6 +11,7 @@
 
 #define DEBUG
 //#define FAST
+#define ROOT_SIFT
 
 
 #include <string>
