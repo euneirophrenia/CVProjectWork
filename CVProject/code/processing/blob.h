@@ -45,6 +45,10 @@ struct Blob {
         return *this;
     }
 
+    bool isInside(cv::Mat image) {
+        return position.x >= 0 && position.y >= 0 && position.x < image.cols && position.y < image.rows;
+    }
+
 };
 
 std::ostream& operator<<(std::ostream &strm, const Blob &b) {

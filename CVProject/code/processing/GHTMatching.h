@@ -35,12 +35,21 @@ struct VotingMatrix {
         estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
         estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
 
+
+
         Blob b;
         b.position = estimated_bary;
         b.confidence = 1;
         b.matches.push_back(match);
         b.area = 1;
         b.model = forModel;
+
+        if (!b.isInside(scene->image)) {
+#ifdef DEBUG
+            std::cerr << "[IGNORING] Vote @" << estimated_bary << "\n";
+#endif
+            return;
+        }
 
         bool found = false;
         for (int i = 0; i< blobs[forModel].size() && !found; i++) {
@@ -587,21 +596,11 @@ class GHTMatcher {
 
         auto dmatches = MultiFindKnn(modelfeats, scene->features, algo->matcher, context["THRESHOLD"]);
 
-        std::vector<cv::Mat> votes;
-        std::vector<cv::Mat> scales;
-
-        for (int i=0; i < models.size(); i++) {
-            cv::Mat z1 = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
-            cv::Mat z2 = cv::Mat::zeros(scene->image.rows, scene->image.cols, CV_32FC1);
-            votes.push_back(z1);
-            scales.push_back(z2);
-        }
-
         for (auto match : dmatches) {
-            this->votes->castVote(match, models[match.imgIdx]);
+            this->votes->castVote(match, models[match.imgIdx], collapseDistance);
         }
 
-        this->votes->collapse(collapseDistance);
+        //this->votes->collapse(collapseDistance);
         this->votes->relativeFilter(relativeThreshold);
         this->votes->prune(pruneDistance);
 
