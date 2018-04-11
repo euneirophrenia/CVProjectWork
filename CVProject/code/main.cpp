@@ -7,7 +7,7 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/m2.png"
+#define TEST_SCENE "scenes/m4.png"
 
 
 int main(int argc, char** argv){
@@ -83,9 +83,9 @@ int main(int argc, char** argv){
 
 #ifdef DEBUG
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
-    std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds \n";
-
+    std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds\n";
 #endif
+
     for (auto match : multi) {
         auto ghtmatch = match.second;
         std::string modelname = match.first -> path;
@@ -93,7 +93,7 @@ int main(int argc, char** argv){
 
         if (!ghtmatch.empty()) {
             for (auto blob : ghtmatch) {
-                std::cout << "\tFound at " << blob.position << "\t(conf: " << blob.confidence << ",\tarea: " << blob.area << ")\n";
+                std::cout << "\tFound at " << blob.position << "\t(confidence: " << blob.confidence << ")\n";
                 //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
 
 

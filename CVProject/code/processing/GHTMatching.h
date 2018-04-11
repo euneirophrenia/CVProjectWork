@@ -9,6 +9,8 @@
 #include "blob.h"
 #include "matching.h"
 
+
+
 struct VotingMatrix {
     private:
     std::map<RichImage*, std::vector<Blob>> blobs;
@@ -19,7 +21,7 @@ struct VotingMatrix {
         this->scene = scene;
     }
 
-    void castVote(cv::DMatch match, RichImage *forModel) {
+    void castVote(cv::DMatch match, RichImage *forModel, double l1dist = 5) {
         double scale = scene->keypoints[match.trainIdx].size;
         double angle = scene->keypoints[match.trainIdx].angle - forModel->keypoints[match.queryIdx].angle;
 
@@ -43,7 +45,7 @@ struct VotingMatrix {
         bool found = false;
         for (int i = 0; i< blobs[forModel].size() && !found; i++) {
             double l1norm = abs(b.position.x - blobs[forModel][i].position.x) + abs(b.position.y - blobs[forModel][i].position.y);
-            if (l1norm < 2){
+            if (l1norm <= l1dist){
                 found = true;
                 blobs[forModel][i]+=b;
             }
@@ -54,6 +56,45 @@ struct VotingMatrix {
     }
 
     void collapse(double collapsingDistance) {
+
+        std::vector<Blob> collapsed;
+
+        for (auto pair : blobs) {
+
+            collapsed.clear();
+
+            for (auto blob : pair.second) {
+
+                if (blob.position.x < 0 || blob.position.y < 0 ||
+                    blob.position.x > scene->image.cols  || blob.position.y > scene->image.rows) {
+#ifdef DEBUG
+                    std::cerr << "[IGNORING] " << blob << "\n";
+#endif
+                    continue;
+                }
+
+                bool placed=false;
+                for (int k = 0; k < collapsed.size() && !placed; k++){
+                    double dist = cv::norm(blob.position - collapsed[k].position);
+                    if (dist <= collapsingDistance) {
+#ifdef DEBUG
+                        std::cerr << "[COLLAPSING] " << blob <<  " with " << collapsed[k] << "\n";
+#endif
+                        placed = true;
+                        collapsed[k] += blob;
+                    }
+                }
+
+                if (!placed) collapsed.push_back(blob);
+
+            }
+
+            blobs[pair.first] = collapsed;
+
+        }
+    }
+
+    void collapseConnected(double collapsingDistance) {
 
         for (auto pair : blobs) {
             cv::Mat votes = cv::Mat::zeros(scene->image.size(), CV_32F);
@@ -79,19 +120,6 @@ struct VotingMatrix {
             if (howmany < 2) {
                 continue;
             }
-
-            /*for (int i1 = 0; i1< labels.rows; i1++){
-                for (int j1=0; j1< labels.cols; j1++) {
-                    int lab = labels.at<int>(i1,j1);
-                    if (lab == 0)
-                        std::cout << " - ";
-                    else
-                        std::cout << " " << lab << " ";
-                }
-                std::cout << "\n";
-            }
-
-            exit(0);*/
 
             std::vector<Blob> compacted;
             compacted.reserve( howmany - 1);
@@ -480,7 +508,7 @@ class GHTMatcher {
         std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo->matcher, context["THRESHOLD"], true);
 
         for (auto match : matches) {
-            votes->castVote(match, model);
+            votes->castVote(match, model, collapseDistance);
         }
 
     }
@@ -495,7 +523,7 @@ class GHTMatcher {
         this->scene = scene;
 
         this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/10;
-        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/2;
+        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/1.5;
 
         this->relativeThreshold = relativeThreshold;
         this->absoluteThreshold = absoluteThreshold;
@@ -515,11 +543,11 @@ class GHTMatcher {
 
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
-        for (int i=0; i<models.size(); i++) {
+        for (int i=0; i < models.size(); i++) {
             _ghtmatch(models[i], algo);
         }
 
-        votes -> collapse(collapseDistance);
+        //votes -> collapse(collapseDistance);
 
         if (absoluteThreshold < 0) {
             float total_conf = 0;

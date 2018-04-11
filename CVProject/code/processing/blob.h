@@ -34,7 +34,7 @@ struct Blob {
             return *this;
         }
 
-        this->position = (this->confidence*this->position + other.confidence*other.position)/(this->confidence+other.confidence);
+        this->position = ((confidence * position) + (other.confidence * other.position))/(confidence+other.confidence);
         this->area += other.area;
         this->confidence += other.confidence;
 

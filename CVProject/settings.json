@@ -6,7 +6,7 @@
   "SCENES_PATH"  : "../CVProject/scenes",
 
   "MIN_MATCHES" : 50, // to state that an object has been found, in the basic algorithm
-  "THRESHOLD"  : 0.6, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
+  "THRESHOLD"  : 0.65, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
 
   "ACCEPTED_EXTENSIONS" : [".jpg", ".png"], //just to not have some random exceptions when trying to load a directory of images, you know..
 
