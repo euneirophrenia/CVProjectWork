@@ -3,11 +3,14 @@
 //
 
 #include "processing/GHTMatching.h"
-#include <chrono>
+#ifdef DEBUG
+    #include <ctime>
+    #include <chrono>
+#endif
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/m2.png"
+#define TEST_SCENE "scenes/m4.png"
 
 
 int main(int argc, char** argv){
@@ -61,29 +64,47 @@ int main(int argc, char** argv){
 
 #ifdef DEBUG
     auto now = std::chrono::high_resolution_clock::now();
+    std::clock_t c_start = std::clock();
 #endif
-
     ///preprocess the scene
     scene->deBlur(false);
     scene -> build(alg);
     int approx_scale = scene->approximateScale();
 
 #ifdef DEBUG
+    std::clock_t c_end = std::clock();
     std::cerr << "[DEBUG] Scene:\t" << scene->path << "\n";
     std::cerr << "[DEBUG] Detected scale:\t" << approx_scale << "\n";
+    std::cerr << "[DEBUG] Scene preprocessing CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
 #endif
 
     auto ghtmatcher = new GHTMatcher(scene);
 
 #ifdef FAST
+#ifdef DEBUG
+    c_start = std::clock();
+#endif
     auto multi = ghtmatcher->FastGHTMatch(model_references, alg);
+#ifdef DEBUG
+    c_end = std::clock();
+    std::cerr << "[DEBUG] FastGHTMatch CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
+#endif
 #else
+    #ifdef DEBUG
+        c_start = std::clock();
+    #endif
     auto multi = ghtmatcher->GHTMatch(model_references, alg);
+    #ifdef  DEBUG
+        c_end = std::clock();
+        std::cerr << "[DEBUG] GHTMatch CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
+    #endif
 #endif
 
 #ifdef DEBUG
+
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
     std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds\n";
+
 #endif
 
     for (auto match : multi) {

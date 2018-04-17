@@ -10,18 +10,18 @@
 #include "matching.h"
 
 
-
 struct VotingMatrix {
     private:
     std::map<RichImage*, std::vector<Blob>> blobs;
     RichImage* scene;
+    std::map<RichImage*, cv::Mat> masks;
 
     public:
     explicit VotingMatrix(RichImage* scene) {
         this->scene = scene;
     }
 
-    void castVote(cv::DMatch match, RichImage *forModel, double l1dist = 5) {
+    void castVote(cv::DMatch match, RichImage *forModel, double collapseDistance = 5, bool useL1Norm = true) {
         double scale = scene->keypoints[match.trainIdx].size;
         double angle = scene->keypoints[match.trainIdx].angle - forModel->keypoints[match.queryIdx].angle;
 
@@ -35,7 +35,8 @@ struct VotingMatrix {
         estimated_bary.x = (scenept.x +  scale * houghmodel[0]);
         estimated_bary.y = (scenept.y +  scale * houghmodel[1]);
 
-
+        if (masks.count(forModel) == 0)
+            masks[forModel] = cv::Mat::zeros(scene->image.size(), CV_32S);
 
         Blob b;
         b.position = estimated_bary;
@@ -46,21 +47,22 @@ struct VotingMatrix {
 
         if (!b.isInside(scene->image)) {
 #ifdef DEBUG
-            std::cerr << "[IGNORING] Vote @" << estimated_bary << "\n";
+            std::cerr << "[IGNORING] Vote @" << estimated_bary << " for " << forModel->path <<"\n";
 #endif
             return;
         }
 
-        bool found = false;
-        for (int i = 0; i< blobs[forModel].size() && !found; i++) {
-            double l1norm = abs(b.position.x - blobs[forModel][i].position.x) + abs(b.position.y - blobs[forModel][i].position.y);
-            if (l1norm <= l1dist){
-                found = true;
-                blobs[forModel][i]+=b;
+        int found = masks[forModel].at<int>(b.position);
+        if (found > 0) {
+            blobs[forModel][found - 1] += b;
+        }
+        else {
+            blobs[forModel].push_back(b);
+            for (int i = b.position.x - collapseDistance/2.0f; i < b.position.x + collapseDistance/2.0f; i++) {
+                for (int j = b.position.y - collapseDistance/2.0f; j < b.position.y + collapseDistance/2.0f; j++)
+                    masks[forModel].at<int>(j, i) = (int)blobs[forModel].size();
             }
         }
-        if (!found)
-            blobs[forModel].push_back(b);
 
     }
 
@@ -87,7 +89,7 @@ struct VotingMatrix {
                     double dist = cv::norm(blob.position - collapsed[k].position);
                     if (dist <= collapsingDistance) {
 #ifdef DEBUG
-                        std::cerr << "[COLLAPSING] " << blob <<  " with " << collapsed[k] << "\n";
+                        std::cerr << "[COLLAPSING] " << blob <<  " with " << collapsed[k] << " - " << dist << "\n";
 #endif
                         placed = true;
                         collapsed[k] += blob;
@@ -517,7 +519,7 @@ class GHTMatcher {
         std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo->matcher, context["THRESHOLD"], true);
 
         for (auto match : matches) {
-            votes->castVote(match, model, collapseDistance);
+            votes->castVote(match, model, 10);
         }
 
     }
@@ -531,7 +533,7 @@ class GHTMatcher {
         votes = new VotingMatrix(scene);
         this->scene = scene;
 
-        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/10;
+        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/8;
         this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/1.5;
 
         this->relativeThreshold = relativeThreshold;
@@ -552,11 +554,11 @@ class GHTMatcher {
 
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
-        for (int i=0; i < models.size(); i++) {
-            _ghtmatch(models[i], algo);
+        for (auto mp : models) {
+            _ghtmatch(mp, algo);
         }
 
-        //votes -> collapse(collapseDistance);
+        votes -> collapse(collapseDistance);
 
         if (absoluteThreshold < 0) {
             float total_conf = 0;

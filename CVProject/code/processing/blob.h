@@ -9,45 +9,79 @@
 
 struct Blob {
 
-    cv::Point2d position;
-    float confidence;
-    int area;
-    std::vector<cv::DMatch> matches;
-    RichImage* model;
+    public:
+        cv::Point2d position;
+        float confidence;
+        int area;
+        std::vector<cv::DMatch> matches;
+        RichImage* model;
 
-    Blob() : position(cv::Point2d(0,0)), confidence(0.0f), area(0), model(nullptr), matches(std::vector<cv::DMatch>()) {}
+        Blob() : position(cv::Point2d(0,0)), confidence(0.0f), area(0), model(nullptr), matches(std::vector<cv::DMatch>()) {}
 
-    /*bool operator== (Blob& other) {
-        return this->position == other.position
-               && this-> area == other.area
-               && this-> confidence == other.confidence
-               && this->modelName == other.modelName;
+        /*bool operator== (Blob& other) {
+            return this->position == other.position
+                   && this-> area == other.area
+                   && this-> confidence == other.confidence
+                   && this->modelName == other.modelName;
 
-    }
+        }
 
-    bool operator != (Blob& other) {
-        return ! (*this == other);
-    }*/
+        bool operator != (Blob& other) {
+            return ! (*this == other);
+        }*/
 
-    Blob operator += (Blob& other) {
-        if (other.model != this->model) {
+        Blob operator += (Blob& other) {
+            if (other.model != this->model) {
+                return *this;
+            }
+
+            this->position = ((confidence * position) + (other.confidence * other.position))/(confidence+other.confidence);
+            this->area += other.area;
+            this->confidence += other.confidence;
+
+            for (auto dm : other.matches) {
+                this->matches.push_back(dm);
+            }
+
             return *this;
         }
 
-        this->position = ((confidence * position) + (other.confidence * other.position))/(confidence+other.confidence);
-        this->area += other.area;
-        this->confidence += other.confidence;
-
-        for (auto dm : other.matches) {
-            this->matches.push_back(dm);
+        bool isInside(cv::Mat image) {
+            return position.x >= 0 && position.y >= 0 && position.x < image.cols && position.y < image.rows;
         }
 
-        return *this;
-    }
+};
 
-    bool isInside(cv::Mat image) {
-        return position.x >= 0 && position.y >= 0 && position.x < image.cols && position.y < image.rows;
-    }
+struct BlobProxy {
+    private:
+        std::vector<Blob> queue;
+
+    public:
+        cv::Point2d avgPosition;
+
+        void add(Blob& b) {
+            if (queue.size() == 0) {
+                avgPosition = b.position;
+                return;
+            }
+            avgPosition *= (float)queue.size();
+            avgPosition += b.position;
+            queue.push_back(b);
+            avgPosition /=  (float)queue.size();
+        }
+
+        Blob toBlob() {
+            if (queue.size() == 0)
+                throw std::invalid_argument("Empty proxy can't be turned to blob (yet).");
+
+            Blob b = queue[0];
+
+            for (int i=1; i< queue.size(); i++)
+                b += queue[i];
+
+            return b;
+        }
+
 
 };
 

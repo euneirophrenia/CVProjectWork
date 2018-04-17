@@ -208,8 +208,8 @@ double distance(cv::Point a, cv::Point b) {
 }
 
 
-std::string fileName(const std::string& str, bool withoutExtension = false)
-{
+std::string fileName(const std::string& str, bool withoutExtension = false) {
+    
     size_t found = str.find_last_of("/\\");
     std::string path = str.substr(found+1); // check that is OK
 
