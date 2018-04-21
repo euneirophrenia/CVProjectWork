@@ -21,7 +21,7 @@ struct VotingMatrix {
         this->scene = scene;
     }
 
-    void castVote(cv::DMatch match, RichImage *forModel, double collapseDistance = 5, bool useL1Norm = true) {
+    inline void castVote(cv::DMatch match, RichImage *forModel, double collapseDistance = 5, bool useL1Norm = true) {
         double scale = scene->keypoints[match.trainIdx].size;
         double angle = scene->keypoints[match.trainIdx].angle - forModel->keypoints[match.queryIdx].angle;
 
@@ -58,15 +58,21 @@ struct VotingMatrix {
         }
         else {
             blobs[forModel].push_back(b);
-            for (int i = b.position.x - collapseDistance/2.0f; i < b.position.x + collapseDistance/2.0f; i++) {
-                for (int j = b.position.y - collapseDistance/2.0f; j < b.position.y + collapseDistance/2.0f; j++)
-                    masks[forModel].at<int>(j, i) = (int)blobs[forModel].size();
+            int n = (int)blobs[forModel].size();
+            int i0 = (int) MAX(b.position.x - collapseDistance/2.0f, 0),
+                    imax = (int) MIN(b.position.x + collapseDistance/2.0f, masks[forModel].cols),
+                    j0 = (int) MAX(b.position.y - collapseDistance/2.0f,0),
+                    jmax = (int)MIN(b.position.y + collapseDistance/2.0f, masks[forModel].rows);
+
+            for (int i = i0; i < imax; i++) {
+                for (int j = j0; j < jmax; j++)
+                    masks[forModel].at<int>(j, i) = n;
             }
         }
 
     }
 
-    void collapse(double collapsingDistance) {
+    inline void collapse(double collapsingDistance) {
 
         std::vector<Blob> collapsed;
 
@@ -105,7 +111,7 @@ struct VotingMatrix {
         }
     }
 
-    void collapseConnected(double collapsingDistance) {
+    inline void collapseConnected(double collapsingDistance) {
 
         for (auto pair : blobs) {
             cv::Mat votes = cv::Mat::zeros(scene->image.size(), CV_32F);
@@ -159,7 +165,7 @@ struct VotingMatrix {
         }
     }
 
-    void prune(double pruneDistance) {
+    inline void prune(double pruneDistance) {
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
 
@@ -207,7 +213,7 @@ struct VotingMatrix {
     }
 
     ///filter out all blobs with confidence < threhsold * best_confidence within the same model
-    void relativeFilter(double threshold = 0.5) {
+    inline void relativeFilter(double threshold = 0.5) {
         std::vector<size_t> indicesToRemove;
         for (auto pair:blobs) {
 
@@ -237,7 +243,7 @@ struct VotingMatrix {
     }
 
     ///filter out all blobs with less than an absolute value for confidence
-    void absoluteFilter(double threshold = context["MIN_HOUGH_VOTES"]) {
+    inline void absoluteFilter(double threshold = context["MIN_HOUGH_VOTES"]) {
         std::vector<size_t> indicesToRemove;
 
         for (auto pair:blobs) {
@@ -262,11 +268,15 @@ struct VotingMatrix {
 
     }
 
-    std::vector<Blob> operator[] (RichImage* model) {
+    inline std::vector<Blob> operator[] (RichImage* model) {
         return blobs[model];
     }
 
-    std::map<RichImage*, std::vector<Blob>> asMap() {
+    inline std::map<RichImage*, std::vector<Blob>> asMap() {
+        for (auto pair : blobs){
+            if (pair.second.empty())
+                blobs.erase(pair.first);
+        }
         return this->blobs;
     }
 
@@ -509,7 +519,7 @@ class GHTMatcher {
 
     VotingMatrix* votes;
 
-    void _ghtmatch(RichImage *model, Algorithm* algo) {
+    inline void _ghtmatch(RichImage *model, Algorithm* algo) {
 
         if (model->keypoints.empty()) {
             model->build(algo, true);
@@ -533,7 +543,7 @@ class GHTMatcher {
         votes = new VotingMatrix(scene);
         this->scene = scene;
 
-        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/8;
+        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/9;
         this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/1.5;
 
         this->relativeThreshold = relativeThreshold;
@@ -560,6 +570,10 @@ class GHTMatcher {
 
         votes -> collapse(collapseDistance);
 
+        votes->relativeFilter(relativeThreshold);
+        votes->prune(pruneDistance);
+
+
         if (absoluteThreshold < 0) {
             float total_conf = 0;
             int total = 0;
@@ -576,9 +590,6 @@ class GHTMatcher {
 
         ///filter out everything with confidence < 0.1 * mean_confidence, it is probably garbage
         votes->absoluteFilter(absoluteThreshold);
-        votes->relativeFilter(relativeThreshold);
-
-        votes->prune(pruneDistance);
 
         return votes->asMap();
     }

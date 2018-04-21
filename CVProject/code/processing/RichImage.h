@@ -47,7 +47,7 @@ struct RichImage {
 
     public:
 
-        void build(Algorithm* algo, bool andBuildHough = false){
+        inline void build(Algorithm* algo, bool andBuildHough = false){
 
             algo->detector->detectAndCompute(this->image, cv::Mat(), this->keypoints, this->features);
 
@@ -65,11 +65,11 @@ struct RichImage {
 
         }
 
-        operator cv::Mat() const {
+        inline operator cv::Mat() const {
             return image;
         }
 
-        operator cv::InputArray () const {
+       inline  operator cv::InputArray () const {
             return cv::InputArray(image);
         }
 
@@ -89,13 +89,13 @@ struct RichImage {
         /// backwards compatibility, I initially didn't account for
         explicit RichImage() {}
 
-        void GaussianBlur(cv::Size kernelSize = context.GAUSSIAN_KERNEL_SIZE, float xsigma = context.GAUSSIAN_X_SIGMA, float ysigma = context.GAUSSIAN_Y_SIGMA) {
+        inline void GaussianBlur(cv::Size kernelSize = context.GAUSSIAN_KERNEL_SIZE, float xsigma = context.GAUSSIAN_X_SIGMA, float ysigma = context.GAUSSIAN_Y_SIGMA) {
             cv::Mat rescaled;
             cv::GaussianBlur(this->image, rescaled, kernelSize, xsigma, ysigma);
             this->image = rescaled;
         }
 
-        void deBlur(bool fast=false) {
+        inline void deBlur(bool fast=false) {
 
             if (fast) {
                 cv::Mat temp;
@@ -113,18 +113,18 @@ struct RichImage {
             image = sharpened;
         }
 
-        void sharpen() {
+        inline void sharpen() {
             std::vector<float> kernel({-1, -1, -1, -1, 9, -1, -1, -1, -1});
             cv::filter2D(image, image, image.depth(), kernel);
         }
 
-        bool contains(cv::Point p) {
+        inline bool contains(cv::Point p) {
             return image_rect.contains(p);
         }
 
         ///return the lenght (more or less) of the longest vertical line
         // it is a (very) rough estimation of the size of the objects in the scene, it's a quantity proportional to that
-        int approximateScale() {
+        inline int approximateScale() {
             if (_scale < 0) {
                 cv::Mat edges;
 

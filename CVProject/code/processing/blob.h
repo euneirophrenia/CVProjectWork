@@ -30,7 +30,7 @@ struct Blob {
             return ! (*this == other);
         }*/
 
-        Blob operator += (Blob& other) {
+        inline Blob operator += (Blob& other) {
             if (other.model != this->model) {
                 return *this;
             }
@@ -46,7 +46,7 @@ struct Blob {
             return *this;
         }
 
-        bool isInside(cv::Mat image) {
+        inline bool isInside(cv::Mat image) {
             return position.x >= 0 && position.y >= 0 && position.x < image.cols && position.y < image.rows;
         }
 

@@ -10,7 +10,7 @@
 
 //#include "processing/InfiniteMatrix.h"
 
-#define TEST_SCENE "scenes/m4.png"
+#define TEST_SCENE "scenes/m5.png"
 
 
 int main(int argc, char** argv){

@@ -141,7 +141,7 @@ std::string sanifyJSON(std::string filename) {
 }
 
 
-cv::Vec2d rotate(cv::Vec2d src, double angle) {
+inline cv::Vec2d rotate(cv::Vec2d src, double angle) {
 
     auto res = cv::Vec2d(src);
 
@@ -194,7 +194,7 @@ cv::Mat skeleton(cv::Mat src) {
 }
 
 template<typename T>
-int indexOf(T elem, std::vector<T> vec) {
+inline int indexOf(T elem, std::vector<T> vec) {
     for (int i=0; i< vec.size(); i++) {
         if (vec[i] == elem)
             return i;
@@ -203,7 +203,7 @@ int indexOf(T elem, std::vector<T> vec) {
     return -1;
 }
 
-double distance(cv::Point a, cv::Point b) {
+inline double distance(cv::Point a, cv::Point b) {
     return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }
 
