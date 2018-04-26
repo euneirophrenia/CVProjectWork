@@ -26,6 +26,7 @@ struct RichImage {
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat features;
     std::vector<cv::Vec2d> houghModel;
+    bool isHard = false;
 
     private:
         int _scale = -1;
@@ -142,7 +143,14 @@ struct RichImage {
                 }
             }
 
-            return 2 * _scale;
+            return MIN( _scale, image.size().height);
+        }
+
+        inline void hsv(std::vector<cv::Mat> hsv) {
+            cv::Mat tmp;
+            image.convertTo(tmp, cv::COLOR_RGB2HSV);
+            cv::split(tmp, hsv);
+
         }
 
 

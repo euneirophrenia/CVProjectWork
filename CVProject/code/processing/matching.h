@@ -65,6 +65,42 @@ std::vector<cv::DMatch> MultiFindKnn(std::vector<cv::Mat> modelFeatures, cv::Mat
 
 }
 
+std::vector<cv::DMatch> MultiFindKnnWithSimilarity(std::vector<cv::Mat> modelFeatures, cv::Mat& targetFeatures, cv::DescriptorMatcher* matcher,
+                                                   float** similarity, float simThreshold = 0.6,float ratioThreshold = 0.6, bool andClear = true) {
+
+    std::vector<std::vector<cv::DMatch>> matches;
+
+    matcher->add(modelFeatures);
+    matcher->knnMatch(targetFeatures, matches, 2);
+
+    std::vector<cv::DMatch> goodMatches;
+    int dirtytrick;
+
+    for (int k = 0; k < matches.size(); k++)
+    {
+
+        if (matches[k][0].distance < ratioThreshold *(matches[k][1].distance) || similarity[matches[k][0].imgIdx][matches[k][1].imgIdx] >= simThreshold) {
+            dirtytrick = matches[k][0].queryIdx;
+            matches[k][0].queryIdx = matches[k][0].trainIdx;
+            matches[k][0].trainIdx = dirtytrick;
+            goodMatches.push_back(matches[k][0]);
+        }
+
+        if (similarity[matches[k][0].imgIdx][matches[k][1].imgIdx] >= simThreshold) {
+            dirtytrick = matches[k][1].queryIdx;
+            matches[k][1].queryIdx = matches[k][1].trainIdx;
+            matches[k][1].trainIdx = dirtytrick;
+            goodMatches.push_back(matches[k][1]);
+        }
+    }
+
+    if (andClear)
+        matcher->clear();
+
+    return goodMatches;
+
+}
+
 std::vector<cv::DMatch> findRadius(cv::Mat &modelFeatures, cv::Mat &targetFeatures, cv::DescriptorMatcher * matcher, float distance){
     std::vector<std::vector<cv::DMatch>> matches;
     matcher->radiusMatch(modelFeatures, targetFeatures, matches, distance);
@@ -180,7 +216,7 @@ void uniform(std::vector<RichImage*> models,  int approximate_scale = -1) {
         cv::Mat rescaled;
 
         if (factor < 1)
-            GaussianBlur(image->image, rescaled, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA, context.GAUSSIAN_Y_SIGMA);
+            GaussianBlur(image->image, rescaled, context.GAUSSIAN_KERNEL_SIZE, context.GAUSSIAN_X_SIGMA/ factor, context.GAUSSIAN_Y_SIGMA / factor );
         else {
             rescaled = image->image;
         }

@@ -66,7 +66,8 @@ struct VotingMatrix {
 
             for (int i = i0; i < imax; i++) {
                 for (int j = j0; j < jmax; j++)
-                    masks[forModel].at<int>(j, i) = n;
+                    if (masks[forModel].at<int>(j,i) == 0)
+                        masks[forModel].at<int>(j, i) = n;
             }
         }
 
@@ -175,8 +176,8 @@ struct VotingMatrix {
             for (auto blob : matches) {
                 indicesToRemove.clear();
                 bool best=true;
-
                 for (int k =0; k<allblobs.size() && best; k++){
+
                     double dist = distance(allblobs[k].position, blob.position);
                     if (allblobs[k].confidence >= blob.confidence &&  dist <= pruneDistance) {
                         best = false;
@@ -273,11 +274,16 @@ struct VotingMatrix {
     }
 
     inline std::map<RichImage*, std::vector<Blob>> asMap() {
+        if (blobs.empty())
+            return this->blobs;
+
+        std::map<RichImage*, std::vector<Blob>> res;
+
         for (auto pair : blobs){
-            if (pair.second.empty())
-                blobs.erase(pair.first);
+            if (!pair.second.empty())
+                res[pair.first] = pair.second;
         }
-        return this->blobs;
+        return res;
     }
 
 };
@@ -521,15 +527,10 @@ class GHTMatcher {
 
     inline void _ghtmatch(RichImage *model, Algorithm* algo) {
 
-        if (model->keypoints.empty()) {
-            model->build(algo, true);
-        }
-
-
         std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo->matcher, context["THRESHOLD"], true);
 
         for (auto match : matches) {
-            votes->castVote(match, model, 10);
+                votes->castVote(match, model, 10);
         }
 
     }
@@ -543,8 +544,8 @@ class GHTMatcher {
         votes = new VotingMatrix(scene);
         this->scene = scene;
 
-        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/9;
-        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/1.5;
+        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/2;
+        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/0.9;
 
         this->relativeThreshold = relativeThreshold;
         this->absoluteThreshold = absoluteThreshold;
@@ -555,12 +556,6 @@ class GHTMatcher {
 
         if (scene->keypoints.empty())
             algo->detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
-
-        for (auto model : models) {
-            if (model->features.empty())
-                model->build(algo, true);
-        }
-
 
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
@@ -585,7 +580,7 @@ class GHTMatcher {
                 }
             }
 
-            absoluteThreshold = 0.1 * total_conf/total;
+            absoluteThreshold = 1 + 0.1 * total_conf/total;
         }
 
         ///filter out everything with confidence < 0.1 * mean_confidence, it is probably garbage
@@ -594,7 +589,9 @@ class GHTMatcher {
         return votes->asMap();
     }
 
-    std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> models, Algorithm* algo) {
+
+    std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> models, Algorithm* algo,
+                                                        float** similarityMatrix = nullptr, float similarityTrheshold = 0.6) {
 
         if (scene->keypoints.empty())
             algo->detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -607,20 +604,41 @@ class GHTMatcher {
             modelfeats.push_back(model->features);
         }
 
-        auto dmatches = MultiFindKnn(modelfeats, scene->features, algo->matcher, context["THRESHOLD"]);
+        std::vector<cv::DMatch> dmatches;
+
+        if (similarityMatrix == nullptr)
+            dmatches = MultiFindKnn(modelfeats, scene->features, algo->matcher, context["THRESHOLD"]);
+        else
+            dmatches = MultiFindKnnWithSimilarity(modelfeats, scene->features, algo->matcher, similarityMatrix,
+                                                  similarityTrheshold, context["THRESHOLD"]);
 
         for (auto match : dmatches) {
             this->votes->castVote(match, models[match.imgIdx], collapseDistance);
         }
 
-        //this->votes->collapse(collapseDistance);
+        // this->votes->collapse(collapseDistance);
         this->votes->relativeFilter(relativeThreshold);
         this->votes->prune(pruneDistance);
+
+        if (absoluteThreshold < 0) {
+            float total_conf = 0;
+            int total = 0;
+
+            for (auto pair : votes->asMap()) {
+                for (auto blob: pair.second) {
+                    total += 1;
+                    total_conf += blob.confidence;
+                }
+            }
+
+            absoluteThreshold = 1 + 0.1 * total_conf/total;
+        }
+
+        this->votes->absoluteFilter(absoluteThreshold);
 
         return this->votes->asMap();
 
     }
-
 
 };
 

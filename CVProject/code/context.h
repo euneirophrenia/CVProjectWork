@@ -11,7 +11,10 @@
 
 #define DEBUG
 //#define FAST
+#define USE_SIMILARITY
+//#define USE_TEMPLATE
 #define ROOT_SIFT
+#define TIMEIT
 
 
 #include <string>

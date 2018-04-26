@@ -1,136 +1,99 @@
 //
-// Created by Marco DiVi on 27/02/18.
+// Created by Marco DiVi on 26/04/18.
 //
 
+#include "processing/preprocessing.h"
 #include "processing/GHTMatching.h"
-#ifdef DEBUG
-    #include <ctime>
-    #include <chrono>
-#endif
 
-//#include "processing/InfiniteMatrix.h"
-
-#define TEST_SCENE "scenes/m5.png"
-
+#define TEST_SCENE "scenes/h2.jpg"
 
 int main(int argc, char** argv){
 
-    std::map<std::string, std::string> ids;
+/*--------------------- OFFLINE preprocessing ---------------*/
+    Preprocesser preprocesser; //will handle the models for us
 
-    auto msize = context.MODELS.size();
-
-    for (int i =0; i< msize; i++) {
-        ids[context.MODELS[i]] = fileName(context.MODELS[i], true);
-    }
+    ///equalize size of the models and blur where needed
+    preprocesser.uniform(-1); //-1 => automatic size decision, any value >0 will use that value instead
 
     /// setup the algorithm
     auto detector = cv::xfeatures2d::SIFT::create(); //(0, 3, 0.04, 15);
-    //auto detector = cv::xfeatures2d::SURF::create(context["SURF_MIN_HESSIAN"]);
-    //auto detector = cv::BRISK::create((int)context["BRISK_THRESHOLD"], (int)context["BRISK_OCTAVES"], (float)context["BRISK_PATTERNSCALE"]);
-    //auto detector = cv::ORB::create();
-
 
     /// For SIFT / SURF
     auto indexparams = new cv::flann::KDTreeIndexParams(context.KDTREES_INDEX);
 
-    /// FOR BRISK / ORB
-    /*auto indexparams = new cv::flann::LshIndexParams((int)context["LSH_INDEX_TABLES"],
-                          (int) context["LSH_INDEX_KEY_SIZE"], (int) context["LSH_INDEX_MULTIPROBE_LEVEL"]);*/
-
-
     cv::flann::SearchParams* searchParams = new cv::flann::SearchParams((int)context["FLANN_SEARCH_ITERATIONS"]);
     cv::FlannBasedMatcher* matcher = new cv::FlannBasedMatcher(indexparams, searchParams);
-
-
     Algorithm* alg = new Algorithm(detector, matcher);
 
-    std::vector<RichImage*> model_references;
-    for (auto& p : context.MODELS) {
-        model_references.push_back(new RichImage(p, cv::IMREAD_GRAYSCALE));
-    }
+    ///compute features on the loaded models
+    preprocesser.build(alg);  //extracts features AND builds the hough model
 
-    auto scene = new RichImage(context.BASE_PATH + TEST_SCENE); //Images.getOrElse(context.BASE_PATH + TEST_SCENE, load(cv::IMREAD_GRAYSCALE));
+    ///compute their similarity and label the models accordingly (they will have the isHard flag set)
+    preprocesser.computeSimilarity(alg, 0.15);  //use 0.1 as threshold for confusing models, can be set higher
+
+    auto hardModels = preprocesser.hardModels(); //retrieve hard and easy models as computed before
+    auto easyModels = preprocesser.easyModels();
+
+/*---------------- Start of the runtime processing ------------------- */
+#ifdef TIMEIT
+    ///start timing, starting the system clock
+    auto now = std::chrono::high_resolution_clock::now();
+#endif
+
+    ///load the scene both in gray scale and in color, since it will be used to display the output
+    auto scene = new RichImage(context.BASE_PATH + TEST_SCENE);
     auto colorscene = cv::imread(context.BASE_PATH + TEST_SCENE, cv::IMREAD_COLOR);
 
-    ///uniform models (with automatic setting could be done "offline")
-    uniform(model_references, -1); // automatic size decision
-    //uniform(model_references, approx_scale);  // given size
+    //scene->deBlur(false); //deblur being "fast" or not
+    scene->build(alg, false); //false, because we don't need the hough model for the scene
 
-    ///extract the features and also extract the ght model
-    for (auto m : model_references){
-        m->build(alg, true);
-    }
+    int approx_scale = scene->approximateScale(); //computed only once, even if we didn't save it, it is cached within
 
+    auto ghtmatcher = new GHTMatcher(scene); //initialize the matcher, by default it uses the approxScale of the scene
 
-#ifdef DEBUG
-    auto now = std::chrono::high_resolution_clock::now();
-    std::clock_t c_start = std::clock();
-#endif
-    ///preprocess the scene
-    scene->deBlur(false);
-    scene -> build(alg);
-    int approx_scale = scene->approximateScale();
-
-#ifdef DEBUG
-    std::clock_t c_end = std::clock();
-    std::cerr << "[DEBUG] Scene:\t" << scene->path << "\n";
-    std::cerr << "[DEBUG] Detected scale:\t" << approx_scale << "\n";
-    std::cerr << "[DEBUG] Scene preprocessing CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
+#ifdef TIMEIT
+	auto c_start = std::clock();
 #endif
 
-    auto ghtmatcher = new GHTMatcher(scene);
+    ghtmatcher->GHTMatch(hardModels, alg); //use the slow but robust variation on the hard models
+    auto multi = ghtmatcher->FastGHTMatch(easyModels, alg);  //use the fast variation on the "easy" models
 
-#ifdef FAST
-#ifdef DEBUG
-    c_start = std::clock();
-#endif
-    auto multi = ghtmatcher->FastGHTMatch(model_references, alg);
-#ifdef DEBUG
-    c_end = std::clock();
-    std::cerr << "[DEBUG] FastGHTMatch CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
-#endif
-#else
-    #ifdef DEBUG
-        c_start = std::clock();
-    #endif
-    auto multi = ghtmatcher->GHTMatch(model_references, alg);
-    #ifdef  DEBUG
-        c_end = std::clock();
-        std::cerr << "[DEBUG] GHTMatch CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
-    #endif
+#ifdef TIMEIT
+	auto c_end = std::clock();
+	std::cerr << "[DEBUG] GHTMatch CPU time: " << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n";
+	std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
+	std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds\n";
 #endif
 
-#ifdef DEBUG
+/* ---------------- Result display --------------------- */
 
-    std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - now;
-    std::cerr << "[DEBUG] Execution completed in " << elapsed.count() << " seconds\n";
+	for (auto match : multi) {
+		auto ghtmatch = match.second;
+		std::string modelname = match.first -> path;
+		std::cout << "\nLooking for " << modelname << "(isHard: " << match.first->isHard <<")...\n";
 
-#endif
-
-    for (auto match : multi) {
-        auto ghtmatch = match.second;
-        std::string modelname = match.first -> path;
-        std::cout << "\nLooking for " << modelname << "...\n";
-
-        if (!ghtmatch.empty()) {
-            for (auto blob : ghtmatch) {
-                std::cout << "\tFound at " << blob.position << "\t(confidence: " << blob.confidence << ")\n";
-                //cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
+		if (!ghtmatch.empty()) {
+			for (auto blob : ghtmatch) {
+				std::cout << "\tFound at " << blob.position << "\t(confidence: " << blob.confidence << ")\n";
+				//cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
 
 
-                cv::putText(colorscene, ids[blob.model->path], blob.position,
-                            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255,250));
+				cv::putText(colorscene, preprocesser.idOf(blob.model->path), blob.position,
+							cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255,250));
 
-                auto rect = boundingRect(blob.model, scene, blob.matches);
-                if (!rect.empty())
-                    cv::rectangle(colorscene, rect, CvScalar(0, 255, 0), 2, cv::LINE_AA);
-                else
-                    std::cout << "\t\tCould not find proper homography for: " << blob << "\n";
+				auto rect = boundingRect(blob.model, scene, blob.matches);
+				if (!rect.empty())
+					cv::rectangle(colorscene, rect, CvScalar(0, 255, 0), 2, cv::LINE_AA);
+				else
+					std::cout << "\t\tCould not find proper homography for: " << blob << "\n";
 
-            }
-        }
-    }
-    cv::imshow("Matches", colorscene);
-    cv::waitKey(0);
+			}
+		}
+	}
+	cv::imshow("Matches", colorscene);
+	cv::waitKey(0);
+
+
+    return 0;
 
 }
