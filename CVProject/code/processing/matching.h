@@ -16,7 +16,7 @@
 
 
 std::vector<cv::DMatch> findKnn(cv::Mat &targetFeatures, cv::Mat &modelFeatures, cv::DescriptorMatcher *matcher,
-                                float threshold = 0.7, bool andFilter=true) {
+                                float threshold = 0.7, bool andFilter=true, bool doDirtyTrick = false) {
 
     std::vector<std::vector<cv::DMatch>> matches;
     matcher->knnMatch(modelFeatures, targetFeatures, matches, 2);
@@ -27,13 +27,24 @@ std::vector<cv::DMatch> findKnn(cv::Mat &targetFeatures, cv::Mat &modelFeatures,
         for (int k = 0; k < matches.size(); k++)
         {
             if ((matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
+				if (doDirtyTrick){
+					int dirtytrick = matches[k][0].queryIdx;
+					matches[k][0].queryIdx = matches[k][0].trainIdx;
+					matches[k][0].trainIdx = dirtytrick;
+				}
                 goodMatches.push_back(matches[k][0]);
             }
         }
     }
     else {
-        for (int k = 0; k < matches.size(); k++)
-                goodMatches.push_back(matches[k][0]);
+        for (int k = 0; k < matches.size(); k++) {
+			if (doDirtyTrick){
+				int dirtytrick = matches[k][0].queryIdx;
+				matches[k][0].queryIdx = matches[k][0].trainIdx;
+				matches[k][0].trainIdx = dirtytrick;
+			}
+			goodMatches.push_back(matches[k][0]);
+		}
     }
     return goodMatches;
 }
@@ -233,12 +244,9 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
 
     std::map<RichImage*, std::vector<cv::DMatch>> res;
 
-    if (target->features.empty() || target->keypoints.empty())
-        algo.detector->detectAndCompute(target->image, cv::Mat(), target->keypoints, target->features );
-
     std::vector<cv::Mat> allfeats;
 
-    if (fast) {
+    if (fast) { ///EASY MODELS
         for (auto model : models) {
             allfeats.push_back(model->features);
         }
@@ -252,37 +260,45 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
         return res;
     }
 
-    u_long totalMatches[models.size()];
+	///HARD MODELS
 
-    /// find for each model their respective matches
-    cv::DMatch matches[target->keypoints.size()][models.size()];
+    u_long totalMatches[models.size()];
+	cv::Point positions[models.size()];
+	std::vector<cv::DMatch> matches[models.size()];
+	bool isAlive[models.size()];
+
+
+	/// find for each model their respective matches, using a more generous threhsold
     for (int i=0; i<models.size(); i++) {
         auto model = models[i];
-        if (model->keypoints.empty() || model->features.empty())
-            algo.detector->detectAndCompute(model->image, cv::Mat(), model->keypoints, model->features);
 
         std::vector<cv::DMatch> localmatches = findKnn(model->features, target->features, algo.matcher,
-                                                       context.GOOD_MATCH_RATIO_THRESHOLD);
+                                                       0.8, true, true);
         totalMatches[i] = localmatches.size();
-        for (auto match : localmatches) {
-            matches[match.trainIdx][i] = match;
-        }
+        positions[i] = localizeMatches(*model, *target, localmatches);
+        matches[i] = localmatches;
+        isAlive[i] = totalMatches[i] > 250; //is a potential good candidate?
     }
 
-    /// find, for each keypoint in the image, the best match: if a keypoint matched for more than 1 model, keep the model with more matches overall
-    // maybe improve to keep the best looking match (highest ratio to the second nearest,e.g.)
-    for (int keypoint = 0; keypoint < target->keypoints.size(); keypoint ++) {
-        int best_model = -1;
-        for (int model = 0; model < models.size(); model++) {
-            if (matches[keypoint][model].trainIdx >= 0 &&
-                (best_model < 0 || totalMatches[best_model] < totalMatches[model]) &&
-                totalMatches[model] >= context.MIN_MATCHES) {
-                best_model = model;
-            }
-        }
-        if (best_model >= 0) {
-            res[models[best_model]].push_back(matches[keypoint][best_model]);
-        }
+    ///solve conflicts, if two models have been localized too close to each other, keep the one with more evidence
+    //(most number of overall matches)
+	for (int i=0; i< models.size(); i++) {
+    	if(!isAlive[i])
+    		continue;
+
+    	for (int j=i+1; j<models.size(); j++) {
+    		if (!isAlive[j])
+    			continue;
+    		if (cv::norm(positions[i] - positions[j]) < 60) {
+    			isAlive[MIN(totalMatches[i], totalMatches[j]) == totalMatches[i]? i : j] = false;
+    		}
+    	}
+    }
+
+	///produce output
+	for (int i=0; i< models.size(); i++) {
+    	if (isAlive[i])
+    		res[models[i]] = matches[i];
     }
 
     return res;

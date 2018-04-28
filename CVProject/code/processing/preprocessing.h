@@ -45,7 +45,6 @@ class Preprocesser {
                         minimum = image->image.size();
                 }
             }
-
             else {
                 minimum.height = approximate_scale;
             }

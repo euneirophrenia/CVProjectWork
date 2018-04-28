@@ -3,5 +3,3 @@ cmake-build-debug/
 OpenCV_test/
 .vs/
 *.pdf
-models/
-scenes/
