@@ -46,9 +46,9 @@ struct VotingMatrix {
         b.model = forModel;
 
         if (!b.isInside(scene->image)) {
-#ifdef DEBUG
-            std::cerr << "[IGNORING] Vote @" << estimated_bary << " for " << forModel->path <<"\n";
-#endif
+			std::stringstream ss;
+			ss << "Vote @" << estimated_bary << " for " << forModel->path;
+        	Logger::log(ss.str(), "[IGNORING]\t", DEBUG);
             return;
         }
 
@@ -85,9 +85,7 @@ struct VotingMatrix {
 
                 if (blob.position.x < 0 || blob.position.y < 0 ||
                     blob.position.x > scene->image.cols  || blob.position.y > scene->image.rows) {
-#ifdef DEBUG
-                    std::cerr << "[IGNORING] " << blob << "\n";
-#endif
+                    Logger::log(blob, "[IGNORING]");
                     continue;
                 }
 
@@ -95,9 +93,6 @@ struct VotingMatrix {
                 for (int k = 0; k < collapsed.size() && !placed; k++){
                     double dist = cv::norm(blob.position - collapsed[k].position);
                     if (dist <= collapsingDistance) {
-#ifdef DEBUG
-                        std::cerr << "[COLLAPSING] " << blob <<  " with " << collapsed[k] << " - " << dist << "\n";
-#endif
                         placed = true;
                         collapsed[k] += blob;
                     }
@@ -120,9 +115,8 @@ struct VotingMatrix {
 
                 if (blob.position.x < collapsingDistance/2 || blob.position.y < collapsingDistance/2 ||
                     blob.position.x > votes.cols - collapsingDistance/2 || blob.position.y > votes.rows - collapsingDistance/2) {
-#ifdef DEBUG
-                    std::cerr << "[IGNORING] " << blob << "\n";
-#endif
+                	if (context.cli_options->at("-debug"))
+                    	Logger::log(blob,  "[IGNORING]\t");
                     continue;
                 }
 
@@ -189,12 +183,9 @@ struct VotingMatrix {
                             continue;
                         }
                         else {
-#ifdef DEBUG
-                            std::cerr << "[PRUNING] " << allblobs[k].model ->path << " (" << allblobs[k].position << ", " <<
-                                      allblobs[k].confidence << ") in favor of " << blob.model->path << " (" << blob.position
-                                      << ", " <<
-                                      blob.confidence << " ) - " << dist << "\n";
-#endif
+                        	std::stringstream ss;
+                        	ss << allblobs[k] << " in favor of " << blob << "- " << dist;
+                        	Logger::log(ss.str(), "[PRUNING]\t");
                         }
                     }
                 }
@@ -223,22 +214,24 @@ struct VotingMatrix {
                 if (blob.confidence > best)
                     best = blob.confidence;
             }
-#ifdef DEBUG
-            for (size_t i=0; i < pair.second.size(); i++) {
-                if (pair.second[i].confidence < threshold * best) {
+			if (context.cli_options->at("-debug")) {
+				for (size_t i = 0; i < pair.second.size(); i++) {
+					if (pair.second[i].confidence < threshold * best) {
 
-                    std::cerr << "[RELATIVE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence/best << "/"
-                              << threshold << ")\n";
-                    indicesToRemove.push_back(i);
-                }
-            }
+						std::cerr << "[RELATIVE FILTERING] " << pair.second[i] << "\t("
+								  << pair.second[i].confidence / best << "/"
+								  << threshold << ")\n";
+						indicesToRemove.push_back(i);
+					}
+				}
 
-            blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
-            indicesToRemove.clear();
-#else
-            auto todelete = std::remove_if(blobs[pair.first].begin(), blobs[pair.first].end(), [=](Blob b) {return b.confidence < threshold*best;} );
+				blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
+				indicesToRemove.clear();
+			}
+			else {
+            	auto todelete = std::remove_if(blobs[pair.first].begin(), blobs[pair.first].end(), [=](Blob b) {return b.confidence < threshold*best;} );
                 blobs[pair.first].erase(todelete, blobs[pair.first].end());
-#endif
+			}
         }
 
     }
@@ -248,23 +241,24 @@ struct VotingMatrix {
         std::vector<size_t> indicesToRemove;
 
         for (auto pair:blobs) {
-#ifdef DEBUG
-            for (size_t i = 0; i < pair.second.size(); i++) {
+			if (context.cli_options->at("-debug")) {
+				for (size_t i = 0; i < pair.second.size(); i++) {
 
-                if (pair.second[i].confidence < threshold) {
-                    indicesToRemove.push_back(i);
-                    std::cerr << "[ABSOLUTE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence
-                              << "/"
-                              << threshold << ")\n";
-                }
+					if (pair.second[i].confidence < threshold) {
+						indicesToRemove.push_back(i);
+						std::cerr << "[ABSOLUTE FILTERING] " << pair.second[i] << "\t(" << pair.second[i].confidence
+								  << "/"
+								  << threshold << ")\n";
+					}
 
-                blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
-                indicesToRemove.clear();
-            }
-#else
-            auto todelete = std::remove_if(blobs[pair.first].begin(), blobs[pair.first].end(), [=](Blob b) {return b.confidence < threshold;} );
-                blobs[pair.first].erase(todelete, blobs[pair.first].end());
-#endif
+					blobs[pair.first] = erase_indices(blobs[pair.first], indicesToRemove);
+					indicesToRemove.clear();
+				}
+			}
+			else {
+				auto todelete = std::remove_if(blobs[pair.first].begin(), blobs[pair.first].end(), [=](Blob b) {return b.confidence < threshold;} );
+				blobs[pair.first].erase(todelete, blobs[pair.first].end());
+			}
         }
 
     }
@@ -302,12 +296,12 @@ class GHTMatcher {
 
     VotingMatrix* votes;
 
-    inline void _ghtmatch(RichImage *model, Algorithm* algo) {
+    inline void _ghtmatch(RichImage *model, Algorithm* algo, double spread = 10) {
 
         std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo->matcher, context["THRESHOLD"], true);
 
         for (auto match : matches) {
-                votes->castVote(match, model, 10);
+                votes->castVote(match, model, spread);
         }
 
     }
@@ -340,10 +334,10 @@ class GHTMatcher {
             _ghtmatch(mp, algo);
         }
 
-        votes -> collapse(collapseDistance);
 
-        votes->relativeFilter(relativeThreshold);
-        votes->prune(pruneDistance);
+		votes -> collapse(collapseDistance);
+        votes -> relativeFilter(relativeThreshold);
+        votes -> prune(pruneDistance);
 
 
         if (absoluteThreshold < 0) {

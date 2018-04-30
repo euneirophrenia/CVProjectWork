@@ -7,13 +7,21 @@
 #include <string>
 #include <iostream>
 
+enum LogLevel {
+    INFO = 0,
+    WARNING = 1,
+    DEBUG = 2
+};
+
 class Logger {
 
     public:
-    static inline void log(std::string msg, std::string tag = "[DEBUG]\t", std::ostream& os = std::cerr) {
-#ifdef DEBUG
-        os << tag << msg << "\n";
-#endif
-    }
-
+        static int logLevel;
+        static inline void log(std::string msg, std::string tag = "[DEBUG]\t", LogLevel level = DEBUG, std::ostream& os = std::cerr) {
+        	if (level <= logLevel)
+            	os << tag << msg << "\n";
+        }
 };
+
+
+int Logger::logLevel = INFO;

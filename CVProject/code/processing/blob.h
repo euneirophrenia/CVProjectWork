@@ -50,6 +50,12 @@ struct Blob {
             return position.x >= 0 && position.y >= 0 && position.x < image.cols && position.y < image.rows;
         }
 
+        inline operator std::string() {
+			std::stringstream ss;
+			ss << model->path << " @" << position << " ("<< confidence << ")";
+			return ss.str();
+        }
+
 };
 
 struct BlobProxy {

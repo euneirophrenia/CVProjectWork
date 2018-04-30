@@ -9,12 +9,12 @@
 #ifndef OPENCV_CONTEXT_H
 #define OPENCV_CONTEXT_H
 
-#define DEBUG
+//#define DEBUG
 //#define FAST
-#define USE_SIMILARITY
+//#define USE_SIMILARITY
 //#define USE_TEMPLATE
-#define ROOT_SIFT
-#define TIMEIT
+//#define ROOT_SIFT
+//#define TIMEIT
 
 
 #include <string>
@@ -129,6 +129,8 @@ class Context {
         float GAUSSIAN_X_SIGMA, GAUSSIAN_Y_SIGMA;
         float GOOD_MATCH_RATIO_THRESHOLD;
         int KDTREES_INDEX;
+
+		std::map<std::string, bool>* cli_options = new std::map<std::string, bool>;
 
 
         static Context& getInstance() {

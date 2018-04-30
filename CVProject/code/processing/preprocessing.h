@@ -78,6 +78,8 @@ class Preprocesser {
         inline void computeSimilarity(Algorithm* alg, float threshold = 0.1) {
             similarity = new float*[_models.size()];
 
+            Logger::log("Computing similarity table...", "[INFO]\t", INFO);
+
             bool placed[_models.size()];
 
             for (int i=0; i<_models.size(); i++) {
@@ -116,6 +118,8 @@ class Preprocesser {
                 else
                     easyToTell.push_back(_models[i]);
             }
+
+			Logger::log("..Done", "[INFO]\t", INFO);
         }
 
         inline std::string idOf(std::string model_name) {
