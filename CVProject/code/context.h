@@ -23,6 +23,7 @@
 #include <dirent.h>
 #include <iostream>
 #include <functional>
+#include "utilities/Logger.h"
 
 #include "utilities/json.hpp"
 #include "utilities/tools.h"
@@ -116,6 +117,10 @@ class Context {
             GAUSSIAN_Y_SIGMA = raw_configuration["GAUSSIAN_Y_SIGMA"];
             GOOD_MATCH_RATIO_THRESHOLD = raw_configuration["THRESHOLD"];
             KDTREES_INDEX = raw_configuration["KDTREES_INDEX"];
+//			(*cli_options)["-ght"] = true;
+//			(*cli_options)["-debug"] = true;
+//			(*cli_options)["-time"] = false;
+//			(*cli_options)["-sift"] = false;
         }
 
 

@@ -207,6 +207,10 @@ inline double distance(cv::Point a, cv::Point b) {
     return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }
 
+inline double l1distance(cv::Point a, cv::Point b) {
+	return abs(a.x - b.x) + abs(a.y - b.y);
+}
+
 
 std::string fileName(const std::string& str, bool withoutExtension = true) {
     

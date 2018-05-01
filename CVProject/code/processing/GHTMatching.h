@@ -52,7 +52,7 @@ struct VotingMatrix {
             return;
         }
 
-        int found = masks[forModel].at<int>(b.position);
+        int found = masks[forModel].at<int>(b.position.y, b.position.x);
         if (found > 0) {
             blobs[forModel][found - 1] += b;
         }
@@ -60,13 +60,13 @@ struct VotingMatrix {
             blobs[forModel].push_back(b);
             int n = (int)blobs[forModel].size();
             int i0 = (int) MAX(b.position.x - collapseDistance/2.0f, 0),
-                    imax = (int) MIN(b.position.x + collapseDistance/2.0f, masks[forModel].cols),
+                    imax = (int) MIN(b.position.x + collapseDistance/2.0f, masks[forModel].cols ),
                     j0 = (int) MAX(b.position.y - collapseDistance/2.0f,0),
-                    jmax = (int)MIN(b.position.y + collapseDistance/2.0f, masks[forModel].rows);
+                    jmax = (int)MIN(b.position.y + collapseDistance/2.0f, masks[forModel].rows );
 
             for (int i = i0; i < imax; i++) {
                 for (int j = j0; j < jmax; j++)
-                    if (masks[forModel].at<int>(j,i) == 0)
+                    if (masks[forModel].at<int>(j, i) == 0)
                         masks[forModel].at<int>(j, i) = n;
             }
         }
@@ -83,15 +83,15 @@ struct VotingMatrix {
 
             for (auto blob : pair.second) {
 
-                if (blob.position.x < 0 || blob.position.y < 0 ||
-                    blob.position.x > scene->image.cols  || blob.position.y > scene->image.rows) {
-                    Logger::log(blob, "[IGNORING]");
-                    continue;
-                }
+//                if (blob.position.x < 0 || blob.position.y < 0 ||
+//                    blob.position.x > scene->image.cols  || blob.position.y > scene->image.rows) {
+//                    Logger::log(blob, "[IGNORING]");
+//                    continue;
+//                }
 
                 bool placed=false;
                 for (int k = 0; k < collapsed.size() && !placed; k++){
-                    double dist = cv::norm(blob.position - collapsed[k].position);
+                    double dist = distance(blob.position, collapsed[k].position);
                     if (dist <= collapsingDistance) {
                         placed = true;
                         collapsed[k] += blob;
@@ -315,8 +315,8 @@ class GHTMatcher {
         votes = new VotingMatrix(scene);
         this->scene = scene;
 
-        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale()/2;
-        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale()/0.9;
+        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale() * 0.5;
+        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale() / 0.9;
 
         this->relativeThreshold = relativeThreshold;
         this->absoluteThreshold = absoluteThreshold;
@@ -384,10 +384,10 @@ class GHTMatcher {
                                                   similarityTrheshold, context["THRESHOLD"]);
 
         for (auto match : dmatches) {
-            this->votes->castVote(match, models[match.imgIdx], collapseDistance);
+            this->votes->castVote(match, models[match.imgIdx], 10);
         }
 
-        // this->votes->collapse(collapseDistance);
+        this->votes->collapse(collapseDistance);
         this->votes->relativeFilter(relativeThreshold);
         this->votes->prune(pruneDistance);
 

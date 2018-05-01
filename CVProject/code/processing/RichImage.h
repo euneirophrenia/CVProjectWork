@@ -6,12 +6,9 @@
  * This module collects some useful / recurrent functions I needed throughout the project.
  */
 
-//TODO:: test the strictDescription, optimize it and complete translation of the python work
-
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include "../utilities/ResourcePool.h"
 #include "../utilities/tools.h"
 #include "../context.h"
 

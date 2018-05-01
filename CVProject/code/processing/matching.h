@@ -277,7 +277,7 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
         totalMatches[i] = localmatches.size();
         positions[i] = localizeMatches(*model, *target, localmatches);
         matches[i] = localmatches;
-        isAlive[i] = totalMatches[i] > 250; //is a potential good candidate?
+        isAlive[i] = totalMatches[i] > context.MIN_MATCHES; //is a potential good candidate?
     }
 
     ///solve conflicts, if two models have been localized too close to each other, keep the one with more evidence

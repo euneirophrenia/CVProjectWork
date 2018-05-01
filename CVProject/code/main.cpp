@@ -10,23 +10,24 @@ void displayGHTResults(std::map<RichImage*, std::vector<Blob>> results, cv::Mat*
 	for (auto match : results) {
 		auto ghtmatch = match.second;
 		std::string modelname = match.first->path;
-		std::cout << "\nLooking for " << modelname << "(isHard: " << match.first->isHard << ")...\n";
+		std::cout << "\nLooking for " << modelname << "\t(isHard: " << match.first->isHard << ")...\n";
 
 		if (!ghtmatch.empty()) {
 			for (auto blob : ghtmatch) {
 
 				auto rect = boundingRect(blob.model, scene, blob.matches);
 				if (!rect.empty()) {
+					cv::Point center = (rect.br() + rect.tl()) * 0.5;
 					cv::rectangle(*colorscene, rect, CvScalar(0, 255, 0), 2, cv::LINE_AA);
-					std::cout << "\tFound at " << blob.position << "\t(confidence: " << blob.confidence << ", width: " << rect.width << ", height: "<< rect.height <<")\n";
+					std::cout << "\tFound at " << center << "\t(confidence: " << blob.confidence << ", width: " << rect.width << ", height: "<< rect.height <<")\n";
 					//cv::drawMarker(colorscene, blob.position, colors[blob.modelName]);
 
 
-					cv::putText(*colorscene, preprocesser.idOf(blob.model->path), blob.position,
+					cv::putText(*colorscene, preprocesser.idOf(blob.model->path), center,
 								cv::FONT_HERSHEY_COMPLEX_SMALL, 0.9, CvScalar(250, 255, 250));
 				}
 				else
-					std::cout << "\t\tCould not find proper homography for: " << blob << "\n";
+					std::cout << "\tCould not find proper homography for: " << blob << "\n";
 
 			}
 		}
@@ -76,14 +77,14 @@ int main(int argc, char** argv) {
 	preprocesser.uniform(-1); //-1 => automatic size decision, any value >0 will use that value instead
 
 	/// setup the algorithm
-	auto detector = cv::xfeatures2d::SIFT::create(); //(0, 3, 0.04, 15);
+	auto detector = cv::xfeatures2d::SIFT::create(); //(0, 3, 0.04, 15) default values tuned by Lowe
 
 	/// For SIFT / SURF
 	auto indexparams = new cv::flann::KDTreeIndexParams(context.KDTREES_INDEX);
 
-	cv::flann::SearchParams *searchParams = new cv::flann::SearchParams((int) context["FLANN_SEARCH_ITERATIONS"]);
-	cv::FlannBasedMatcher *matcher = new cv::FlannBasedMatcher(indexparams, searchParams);
-	Algorithm *alg = new Algorithm(detector, matcher);
+	cv::flann::SearchParams* searchParams = new cv::flann::SearchParams((int) context["FLANN_SEARCH_ITERATIONS"]);
+	cv::FlannBasedMatcher* matcher = new cv::FlannBasedMatcher(indexparams, searchParams);
+	Algorithm* alg = new Algorithm(detector, matcher);
 
 	///compute features on the loaded models
 	preprocesser.build(alg);  //extracts features AND builds the hough model
@@ -104,8 +105,8 @@ int main(int argc, char** argv) {
 	auto scene = new RichImage(context.BASE_PATH + test_scene_path);
 	auto colorscene = cv::imread(context.BASE_PATH + test_scene_path, cv::IMREAD_COLOR);
 
-	//scene->deBlur(true); //deblur being "fast" or not, not useful
-	scene->build(alg, false); //false, because we don't need the hough model for the scene
+//	scene->deBlur(false); //deblur being "fast" or not, not useful
+	scene->build(alg, false); //false, because we don't need the hough model for the scene, only extract features
 
 	int approx_scale = scene->approximateScale(); //computed only once, even if we didn't save it, it is cached within
 
