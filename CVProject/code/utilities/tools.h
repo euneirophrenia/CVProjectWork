@@ -14,6 +14,7 @@
 #include "opencv2/opencv.hpp"
 #include <functional>
 #include <math.h>
+#include <sys/stat.h>
 
 #define PI 3.14159265
 
@@ -100,6 +101,18 @@ inline void filter(std::vector<T> data, bool* mask) {
 
 }
 
+
+/**
+ * To check if a file exists, credits @ https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
+ * @param name name of the file
+ * @return if it exists or not, hopefully
+ */
+inline bool exists_file (const std::string& name) {
+	struct stat buffer;
+	return (stat (name.c_str(), &buffer) == 0);
+}
+
+
 char readUntil(std::istream* in, char delim, std::function<void(char)> callback = [](char c) { }) {
     char current = -1;
     char last = current;
@@ -121,6 +134,10 @@ std::string sanifyJSON(std::string filename) {
     std::ifstream inputstream;
     std::string res, line;
     inputstream.open(filename);
+    if (inputstream.fail()) {
+    	std::cerr << "[FATAL ERROR] Could not open settings file " << filename << "\n";
+    	exit(1);
+    }
     char c;
     while (!inputstream.eof()) {
         inputstream.read(&c, 1);
