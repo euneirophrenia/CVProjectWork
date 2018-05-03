@@ -2,8 +2,7 @@
 
   // GENERAL SETTINGS
   "BASE_PATH"   : "../CVProject/",  //not really necessary in theory
-  "MODELS_PATH" : "../CVProject/models",
-  "SCENES_PATH"  : "../CVProject/scenes",
+  "MODELS_PATH" : "./models",
 
   "MIN_MATCHES" : 250, // to state that an object has been found, in the basic algorithm
   "THRESHOLD"  : 0.65, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
@@ -18,19 +17,6 @@
   "GAUSSIAN_X_SIGMA" : 2,
   "GAUSSIAN_Y_SIGMA" : 2,
 
-  "MIN_HOUGH_VOTES" : 30,
-
-
-
-  // ALGORITHMS PARAMETERS
-  "SURF_MIN_HESSIAN" : 400.0, // the hessian threshold for the surf algorithm (the higher, the fewer matches are found)
-  "BRISK_THRESHOLD" : 60,
-  "BRISK_OCTAVES" : 4,
-  "BRISK_PATTERNSCALE" : 1.0,
-
-
-  "LSH_INDEX_TABLES" : 20, // for BRISK/ORB + knnSearch of the Flann matcher
-  "LSH_INDEX_KEY_SIZE" : 10, // '' '' '' ''
-  "LSH_INDEX_MULTIPROBE_LEVEL" : 2 // '' '' '' '' ''
+  "MIN_HOUGH_VOTES" : 30 //not used right now, minimum votes automatically computed
 
 }

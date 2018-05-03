@@ -10,9 +10,13 @@ OpenCV 3.x.x, C++ at least standard 14, CMake 3.8.x, but should work on older ve
 
 ## Deplyment
 it is a CMake project (no Visual Studio project *yet*). Just build it with cmake and then compile with make.
+Please, have care that the executable produced is placed in the same folder as the `settings.json` and the folder `models`.
+
+
 
 ## Running
-it is designed as a CL (command line) utility. At least, pass it as first argument the scene to work on (path relative to project folder, i.e. scenes/e1.png) and then some options:
+it is designed as a CL (command line) utility. 
+At least, pass it as first argument the scene to work on (path relative to the executable folder) and then some options:
 * `-ght` to use the generalized Hough transform
 * `-time` to output time measurement
 * `-sift` to use normal SIFT rather then RootSIFT

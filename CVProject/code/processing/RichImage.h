@@ -3,7 +3,7 @@
 //
 
 /**
- * This module collects some useful / recurrent functions I needed throughout the project.
+ * The RichImage abstraction, foundation for everything else.
  */
 
 #ifndef TOOLS_H

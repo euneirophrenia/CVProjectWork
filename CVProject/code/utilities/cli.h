@@ -23,7 +23,7 @@ std::vector<std::string> accepted_options = {
 void detect(int argc, char** argv, std::string* scene) {
 
 	if (argc < 2) {
-		std::cerr << "At least I need the test scene to work with (relative path from project folder).\n";
+		std::cerr << "At least I need the test scene to work with (relative path from executable folder).\n";
 		std::cerr << "Recognized options are the following:\n";
 		std::cerr << "\t-debug   to enable debug outputs (warning: may lead to data races);\n";
 		std::cerr << "\t-ght     enables the generalized hough transform;\n";

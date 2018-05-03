@@ -28,7 +28,7 @@
 #include "utilities/json.hpp"
 #include "utilities/tools.h"
 
-#define CONFIG_PATH "../CVProject/settings.json"
+#define CONFIG_PATH "./settings.json"
 
 struct Algorithm {
     cv::DescriptorMatcher* matcher;
@@ -110,7 +110,6 @@ class Context {
                 accepted_extensions.push_back(x);
             }
             read_directory(raw_configuration["MODELS_PATH"], MODELS, fileExtensionFilter(accepted_extensions));
-            read_directory(raw_configuration["SCENES_PATH"], SCENES, fileExtensionFilter(accepted_extensions));
             MIN_MATCHES = raw_configuration["MIN_MATCHES"];
             GAUSSIAN_KERNEL_SIZE = CvSize(raw_configuration["GAUSSIAN_KERNEL_SIZE"][0], raw_configuration["GAUSSIAN_KERNEL_SIZE"][1]);
             GAUSSIAN_X_SIGMA = raw_configuration["GAUSSIAN_X_SIGMA"];
@@ -127,7 +126,6 @@ class Context {
     public:
         std::string BASE_PATH;
         std::vector<std::string> MODELS;
-        std::vector<std::string> SCENES;
         std::vector<std::string> accepted_extensions;
         int MIN_MATCHES;
         cv::Size GAUSSIAN_KERNEL_SIZE;

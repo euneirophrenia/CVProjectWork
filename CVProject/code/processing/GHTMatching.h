@@ -10,6 +10,7 @@
 #include "matching.h"
 
 
+///Core structure for the GHT
 struct VotingMatrix {
     private:
     std::map<RichImage*, std::vector<Blob>> blobs;
@@ -21,6 +22,7 @@ struct VotingMatrix {
         this->scene = scene;
     }
 
+    ///Right now the l1norm is simply ignored because I actually need the L2 precision
     inline void castVote(cv::DMatch match, RichImage *forModel, double collapseDistance = 5, bool useL1Norm = true) {
         double scale = scene->keypoints[match.trainIdx].size;
         double angle = scene->keypoints[match.trainIdx].angle - forModel->keypoints[match.queryIdx].angle;
