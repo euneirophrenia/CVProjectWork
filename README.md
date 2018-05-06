@@ -6,11 +6,14 @@ It is meant for personal purposes only.
 ***
 
 ## Requirements
-OpenCV 3.x.x, C++ at least standard 14, CMake 3.8.x, but should work on older versions too.
+OpenCV 3.x.x, C++ at least standard 14, Windows 64 bit architecture.
+Preferibly Visual Studio 17, but should work on elder versions too (after the automatic conversion).
 
 ## Deplyment
-it is a CMake project (no Visual Studio project *yet*). Just build it with cmake and then compile with make.
-Please, have care that the executable produced is placed in the same folder as the `settings.json` and the folder `models`.
+This is the Visual Studio-compatible version.
+
+Compile it through Visual Studio, it should output an exe (ShelfDetect) in the base folder of the project. Run it from a terminal (powershell, ideally) with proper options (see below).
+It needs to have the `opencv3\x64\vc14\bin` folder added to the path (it contains the various libraries, compiled with the non free modules). Everything else *should* be already properly set in the project settings.
 
 
 
