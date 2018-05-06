@@ -5,3 +5,4 @@ OpenCV_test/
 Debug
 Release
 x64
+*.exe
