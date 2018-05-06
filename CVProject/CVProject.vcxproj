@@ -91,6 +91,7 @@
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "$(ProjectDir)"</Command>
+      <Message>Copying to avoid strange path issues..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -113,6 +114,7 @@
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "$(ProjectDir)"</Command>
+      <Message>Copying to avoid strange path issues..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,6 +127,7 @@
     </ClCompile>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "$(ProjectDir)"</Command>
+      <Message>Copying to avoid strange path issues..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,6 +140,7 @@
     </ClCompile>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "$(ProjectDir)"</Command>
+      <Message>Copying to avoid strange path issues..</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

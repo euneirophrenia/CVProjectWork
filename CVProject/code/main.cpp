@@ -95,6 +95,7 @@ int main(int argc, char** argv) {
 	auto hardModels = preprocesser.hardModels(); //retrieve hard and easy models as computed before
 	auto easyModels = preprocesser.easyModels();
 
+
 /*---------------- Start of the runtime processing ------------------- */
 	if (context.cli_options->at("-time")) {
 		///start timing, starting the system clock
@@ -104,10 +105,10 @@ int main(int argc, char** argv) {
 	///load the scene both in gray scale and in color, since it will be used to display the output
 	auto scene = new RichImage(context.BASE_PATH + test_scene_path);
 	auto colorscene = cv::imread(context.BASE_PATH + test_scene_path, cv::IMREAD_COLOR);
+	Logger::log("Loaded scene.", "[INFO]\t", INFO);
 
 //	scene->deBlur(false); //deblur being "fast" or not, not useful
 	scene->build(alg, false); //false, because we don't need the hough model for the scene, only extract features
-
 	int approx_scale = scene->approximateScale(); //computed only once, even if we didn't save it, it is cached within
 
 	Logger::log("Detected scale:\t" + std::to_string(approx_scale), "[INFO]\t", INFO);
