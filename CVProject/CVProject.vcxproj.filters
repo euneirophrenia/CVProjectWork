@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="processing">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="utilities">
+      <UniqueIdentifier>{35a53f29-d53b-45cd-b100-278af2b00519}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="settings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code\utilities\json.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="code\context.h" />
+    <ClInclude Include="dirent.h">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="code\processing\blob.hpp">
+      <Filter>processing</Filter>
+    </ClInclude>
+    <ClInclude Include="code\processing\GHTMatching.hpp">
+      <Filter>processing</Filter>
+    </ClInclude>
+    <ClInclude Include="code\processing\matching.hpp">
+      <Filter>processing</Filter>
+    </ClInclude>
+    <ClInclude Include="code\processing\preprocessing.hpp">
+      <Filter>processing</Filter>
+    </ClInclude>
+    <ClInclude Include="code\processing\RichImage.hpp">
+      <Filter>processing</Filter>
+    </ClInclude>
+    <ClInclude Include="code\utilities\cli.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="code\utilities\Logger.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="code\utilities\tools.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="code\main.cpp" />
+  </ItemGroup>
+</Project>

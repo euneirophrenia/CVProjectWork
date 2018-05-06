@@ -2,9 +2,9 @@
 // Created by Marco DiVi on 26/04/18.
 //
 
-#include "processing/preprocessing.h"
-#include "processing/GHTMatching.h"
-#include "utilities/cli.h"
+#include "processing/preprocessing.hpp"
+#include "processing/GHTMatching.hpp"
+#include "utilities/cli.hpp"
 
 void displayGHTResults(std::map<RichImage*, std::vector<Blob>> results, cv::Mat* colorscene, Preprocesser preprocesser, RichImage* scene) {
 	for (auto match : results) {

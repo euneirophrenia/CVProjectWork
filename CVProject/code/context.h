@@ -20,13 +20,15 @@
 #include <string>
 #include <vector>
 #include <sys/types.h>
-#include <dirent.h>
+
+#include "utilities\dirent.h"
+
 #include <iostream>
 #include <functional>
-#include "utilities/Logger.h"
+#include "utilities/Logger.hpp"
 
 #include "utilities/json.hpp"
-#include "utilities/tools.h"
+#include "utilities/tools.hpp"
 
 #define CONFIG_PATH "./settings.json"
 
@@ -52,7 +54,7 @@ void read_directory(const std::string& name, std::vector<std::string> & v, std::
     struct dirent * dp;
     while ((dp = readdir(dirp)) != nullptr) {
         if (filterName(dp->d_name))
-            v.emplace_back(name + "/" + dp->d_name);
+            v.push_back(name + dp->d_name);
     }
     closedir(dirp);
 }
@@ -76,7 +78,7 @@ std::string extension(std::string& filename) {
  */
 std::function<bool(std::string)> fileExtensionFilter(std::vector<std::string> accepted) {
 
-    return [&](std::string filename) {
+    return [=](std::string filename) {
         auto extension_ = extension(filename);
         for (auto& acc : accepted) {
             if (acc == extension_)

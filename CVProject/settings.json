@@ -1,8 +1,8 @@
 {
 
   // GENERAL SETTINGS
-  "BASE_PATH"   : "../CVProject/",  //not really necessary in theory
-  "MODELS_PATH" : "./models",
+  "BASE_PATH"   : "./",  //the path to the folder containing the settings (also the scenes folder in this demo)
+  "MODELS_PATH" : "./models/",
 
   "MIN_MATCHES" : 250, // to state that an object has been found, in the basic algorithm
   "THRESHOLD"  : 0.65, // threshold on the ratio between the second closest match and the match, to declare a good match has been found
