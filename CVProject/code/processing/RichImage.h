@@ -38,6 +38,8 @@ struct RichImage {
             bary.x /= this->keypoints.size();
             bary.y /= this->keypoints.size();
 
+			//cv::Point2f bary = 0.5*(image_rect.br() + image_rect.tl()); //actually using the image center
+
             for (auto kp : this -> keypoints){
                 this->houghModel.push_back(cv::Vec2d(bary.x - kp.pt.x, bary.y - kp.pt.y) / kp.size);
             }

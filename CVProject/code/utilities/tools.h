@@ -221,7 +221,7 @@ inline int indexOf(T elem, std::vector<T> vec) {
 }
 
 inline double distance(cv::Point a, cv::Point b) {
-    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+    return sqrt(1.0f*(a.x - b.x) * (a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }
 
 inline double l1distance(cv::Point a, cv::Point b) {

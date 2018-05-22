@@ -314,6 +314,7 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
             matches[i] = localmatches;
         }
         else {
+            Logger::log("Ignoring " + model->path + "\t(" +  std::to_string(totalMatches[i]) + " / " + std::to_string(context.MIN_MATCHES) + ")");
             positions[i] = cv::Point2d(-1, -1);
             matches[i] = std::vector<cv::DMatch>();
         }

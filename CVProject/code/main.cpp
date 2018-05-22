@@ -37,7 +37,7 @@ void displayGHTResults(std::map<RichImage*, std::vector<Blob>> results, cv::Mat*
 void displayResults(std::map<RichImage*, std::vector<cv::DMatch>> results, cv::Mat* colorscene, Preprocesser preprocesser, RichImage* scene) {
 	for (auto pair : results) {
 		std::string modelname = pair.first->path;
-		std::cout << "\nLooking for " << modelname << "\t(total matches: " << pair.second.size() << ")...\n";
+		std::cout << "\nLooking for " << modelname << "\t(isHard: " << pair.first->isHard << "\ttotal matches: " << pair.second.size() << ")...\n";
 		if (pair.second.size() > 110) {
 			auto rect = boundingRect(pair.first, scene, pair.second);
 			if (!rect.empty()) {

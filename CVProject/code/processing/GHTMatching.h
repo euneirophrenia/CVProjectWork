@@ -82,6 +82,10 @@ struct VotingMatrix {
         for (auto pair : blobs) {
 
             collapsed.clear();
+//            int h = pair.first->image.size().height;
+//            int w = pair.first->image.size().width;
+//            double actual_threshold = sqrt(h * h  + w * w) * collapsingDistance / h;
+            double actual_threshold = collapsingDistance;
 
             for (auto blob : pair.second) {
 
@@ -94,7 +98,7 @@ struct VotingMatrix {
                 bool placed=false;
                 for (int k = 0; k < collapsed.size() && !placed; k++){
                     double dist = distance(blob.position, collapsed[k].position);
-                    if (dist <= collapsingDistance) {
+                    if (dist <= actual_threshold) {
                         placed = true;
                         collapsed[k] += blob;
                     }
@@ -162,12 +166,17 @@ struct VotingMatrix {
         }
     }
 
-    inline void prune(double pruneDistance) {
+    inline void prune(double estimatedScale) {
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
 
         for (auto pair : blobs) {
             auto matches = pair.second;
+            int h = pair.first->image.size().height;
+            int w = pair.first->image.size().width;
+//            double actual_threshold = sqrt(h * h  + w * w) * 0.5 * estimatedScale / h;
+            double actual_threshold = estimatedScale / 0.85;
+            Logger::log("Threshold for " + pair.first->path + ": " + std::to_string(actual_threshold), "[DEBUG PRUNING]\t");
 
             for (auto blob : matches) {
                 indicesToRemove.clear();
@@ -175,19 +184,16 @@ struct VotingMatrix {
                 for (int k =0; k<allblobs.size() && best; k++){
 
                     double dist = distance(allblobs[k].position, blob.position);
-                    if (allblobs[k].confidence >= blob.confidence &&  dist <= pruneDistance) {
+                    if (allblobs[k].confidence >= blob.confidence &&  dist <= actual_threshold){ //dist <= estimatedScale) {
                         best = false;
                     }
 
-                    if (allblobs[k].confidence < blob.confidence && dist <= pruneDistance) {
+                    if (allblobs[k].confidence < blob.confidence &&  dist <= actual_threshold){ //dist <= estimatedScale) {
                         indicesToRemove.push_back(k);
-                        if (blob.model == allblobs[k].model) {
-                            continue;
-                        }
-                        else {
-                        	std::stringstream ss;
-                        	ss << allblobs[k] << " in favor of " << blob << "- " << dist;
-                        	Logger::log(ss.str(), "[PRUNING]\t");
+                        if (blob.model != allblobs[k].model) {
+                            std::stringstream ss;
+                            ss << allblobs[k] << " in favor of " << blob << "- " << dist;
+                            Logger::log(ss.str(), "[PRUNING]\t");
                         }
                     }
                 }
@@ -318,7 +324,7 @@ class GHTMatcher {
         this->scene = scene;
 
         this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale() * 0.5;
-        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale() / 0.9;
+        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale();
 
         this->relativeThreshold = relativeThreshold;
         this->absoluteThreshold = absoluteThreshold;
