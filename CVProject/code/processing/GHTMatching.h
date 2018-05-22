@@ -79,13 +79,15 @@ struct VotingMatrix {
 
         std::vector<Blob> collapsed;
 
+        float f = context["COLLAPSING_FACTOR"];
+
         for (auto pair : blobs) {
 
             collapsed.clear();
-//            int h = pair.first->image.size().height;
-//            int w = pair.first->image.size().width;
-//            double actual_threshold = sqrt(h * h  + w * w) * collapsingDistance / h;
-            double actual_threshold = collapsingDistance;
+            int h = pair.first->image.size().height;
+            int w = pair.first->image.size().width;
+            double actual_threshold = f * w * collapsingDistance / h;
+//            double actual_threshold = collapsingDistance;
 
             for (auto blob : pair.second) {
 
@@ -170,13 +172,15 @@ struct VotingMatrix {
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
 
+        float f = context["PRUNING_FACTOR"];
+
         for (auto pair : blobs) {
             auto matches = pair.second;
             int h = pair.first->image.size().height;
             int w = pair.first->image.size().width;
-//            double actual_threshold = sqrt(h * h  + w * w) * 0.5 * estimatedScale / h;
-            double actual_threshold = estimatedScale / 0.85;
-            Logger::log("Threshold for " + pair.first->path + ": " + std::to_string(actual_threshold), "[DEBUG PRUNING]\t");
+            double actual_threshold = sqrt(h * h  + w * w) * f * estimatedScale / h;
+//            double actual_threshold = estimatedScale / 0.85;
+//            Logger::log("Threshold for " + pair.first->path + ": " + std::to_string(actual_threshold), "[DEBUG PRUNING]\t");
 
             for (auto blob : matches) {
                 indicesToRemove.clear();
@@ -323,8 +327,8 @@ class GHTMatcher {
         votes = new VotingMatrix(scene);
         this->scene = scene;
 
-        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->approximateScale() * 0.5;
-        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->approximateScale();
+        this->collapseDistance = collapseDistance >= 0 ? collapseDistance : scene->actualScale();
+        this->pruneDistance = pruneDistance >= 0 ? pruneDistance : scene->actualScale();
 
         this->relativeThreshold = relativeThreshold;
         this->absoluteThreshold = absoluteThreshold;

@@ -6,6 +6,7 @@
 #include "processing/GHTMatching.h"
 #include "utilities/cli.h"
 
+
 void displayGHTResults(std::map<RichImage*, std::vector<Blob>> results, cv::Mat* colorscene, Preprocesser preprocesser, RichImage* scene) {
 	for (auto match : results) {
 		auto ghtmatch = match.second;
@@ -70,6 +71,7 @@ int main(int argc, char** argv) {
 	clock_t c_start;
 	auto begin_match = std::chrono::high_resolution_clock::now(), now = std::chrono::high_resolution_clock::now();
 
+
 /*--------------------- OFFLINE preprocessing ---------------*/
 	Preprocesser preprocesser; //will handle the models for us
 
@@ -108,7 +110,7 @@ int main(int argc, char** argv) {
 //	scene->deBlur(false); //deblur being "fast" or not, not useful
 	scene->build(alg, false); //false, because we don't need the hough model for the scene, only extract features
 
-	int approx_scale = scene->approximateScale(); //computed only once, even if we didn't save it, it is cached within
+	int approx_scale = scene->actualScale(); //computed only once, even if we didn't save it, it is cached within
 
 	Logger::log("Detected scale:\t" + std::to_string(approx_scale), "[INFO]\t", INFO);
 
