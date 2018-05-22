@@ -19,8 +19,7 @@ std::vector<cv::DMatch> findKnn(cv::Mat &targetFeatures, cv::Mat &modelFeatures,
                                 float threshold = 0.7, bool andFilter=true, bool doDirtyTrick = false) {
 
     std::vector<std::vector<cv::DMatch>> matches;
-    matcher->knnMatch(modelFeatures, targetFeatures, matches, 2);
-
+    matcher->knnMatch(modelFeatures, targetFeatures, matches, 2);  //from the model to the target, use accordingly
     std::vector<cv::DMatch> goodMatches;
 
     if (andFilter){
@@ -48,6 +47,40 @@ std::vector<cv::DMatch> findKnn(cv::Mat &targetFeatures, cv::Mat &modelFeatures,
     }
     return goodMatches;
 }
+
+//std::vector<cv::DMatch> findKnn(cv::Mat &targetFeatures, cv::Mat &modelFeatures, cv::DescriptorMatcher *matcher,
+//								float threshold = 0.7, bool andFilter=true, bool doDirtyTrick = false) {
+//
+//	std::vector<std::vector<cv::DMatch>> matches;
+//	matcher->knnMatch(targetFeatures, modelFeatures, matches, 2);  //from the scene to the model
+//	std::vector<cv::DMatch> goodMatches;
+//
+//	if (andFilter){
+//		for (int k = 0; k < matches.size(); k++)
+//		{
+//			if ((matches[k][0].distance < threshold *(matches[k][1].distance)) && (matches[k].size() <= 2 && matches[k].size()>0) ) {
+//				if (doDirtyTrick){
+//					int dirtytrick = matches[k][0].queryIdx;
+//					matches[k][0].queryIdx = matches[k][0].trainIdx;
+//					matches[k][0].trainIdx = dirtytrick;
+//				}
+//				goodMatches.push_back(matches[k][0]);
+//			}
+//		}
+//	}
+//	else {
+//		for (int k = 0; k < matches.size(); k++) {
+//			if (doDirtyTrick){
+//				int dirtytrick = matches[k][0].queryIdx;
+//				matches[k][0].queryIdx = matches[k][0].trainIdx;
+//				matches[k][0].trainIdx = dirtytrick;
+//			}
+//			goodMatches.push_back(matches[k][0]);
+//		}
+//	}
+//	return goodMatches;
+//}
+
 
 std::vector<cv::DMatch> MultiFindKnn(std::vector<cv::Mat> modelFeatures, cv::Mat& targetFeatures, cv::DescriptorMatcher* matcher,
                                                 float threshold = 0.6, bool andClear = true) {
@@ -268,16 +301,23 @@ std::map<RichImage*, std::vector<cv::DMatch>> multiMatch(std::vector<RichImage*>
 	bool isAlive[models.size()];
 
 
-	/// find for each model their respective matches, using a more generous threhsold
+	/// find for each model their respective matches
     for (int i=0; i<models.size(); i++) {
         auto model = models[i];
 
         std::vector<cv::DMatch> localmatches = findKnn(model->features, target->features, algo.matcher,
-                                                       0.8, true, true);
+                                                       context["THRESHOLD"], true, true);
         totalMatches[i] = localmatches.size();
-        positions[i] = localizeMatches(*model, *target, localmatches);
-        matches[i] = localmatches;
         isAlive[i] = totalMatches[i] > context.MIN_MATCHES; //is a potential good candidate?
+        if (isAlive[i]) {
+            positions[i] = localizeMatches(*model, *target, localmatches);
+            matches[i] = localmatches;
+        }
+        else {
+            positions[i] = cv::Point2d(-1, -1);
+            matches[i] = std::vector<cv::DMatch>();
+        }
+
     }
 
     ///solve conflicts, if two models have been localized too close to each other, keep the one with more evidence

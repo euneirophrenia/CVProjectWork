@@ -300,7 +300,7 @@ class GHTMatcher {
 
     inline void _ghtmatch(RichImage *model, Algorithm* algo, double spread = 10) {
 
-        std::vector<cv::DMatch> matches = findKnn(scene->features, model->features, algo->matcher, context["THRESHOLD"], true);
+        std::vector<cv::DMatch> matches = findKnn(model->features, scene->features, algo->matcher, context["THRESHOLD"], true, true);
 
         for (auto match : matches) {
                 votes->castVote(match, model, spread);
@@ -363,8 +363,7 @@ class GHTMatcher {
     }
 
 
-    std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> models, Algorithm* algo,
-                                                        float** similarityMatrix = nullptr, float similarityTrheshold = 0.6) {
+    std::map<RichImage*, std::vector<Blob>> FastGHTMatch(std::vector<RichImage *> models, Algorithm* algo) {
 
         if (scene->keypoints.empty())
             algo->detector->detectAndCompute(scene->image, cv::Mat(), scene->keypoints, scene->features);
@@ -378,12 +377,7 @@ class GHTMatcher {
         }
 
         std::vector<cv::DMatch> dmatches;
-
-        if (similarityMatrix == nullptr)
-            dmatches = MultiFindKnn(modelfeats, scene->features, algo->matcher, context["THRESHOLD"]);
-        else
-            dmatches = MultiFindKnnWithSimilarity(modelfeats, scene->features, algo->matcher, similarityMatrix,
-                                                  similarityTrheshold, context["THRESHOLD"]);
+        dmatches = MultiFindKnn(modelfeats, scene->features, algo->matcher, context["THRESHOLD"]);
 
         for (auto match : dmatches) {
             this->votes->castVote(match, models[match.imgIdx], 10);
