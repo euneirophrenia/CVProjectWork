@@ -9,6 +9,8 @@
 #include "blob.h"
 #include "matching.h"
 
+#include "../threading/threadpool.h"
+
 
 ///Core structure for the GHT
 struct VotingMatrix {
@@ -22,8 +24,7 @@ struct VotingMatrix {
         this->scene = scene;
     }
 
-    ///Right now the l1norm is simply ignored because I actually need the L2 precision
-    inline void castVote(cv::DMatch match, RichImage *forModel, double collapseDistance = 5, bool useL1Norm = true) {
+    inline void castVote(cv::DMatch match, RichImage *forModel, double collapseDistance = 5) {
         double scale = scene->keypoints[match.trainIdx].size;
         double angle = scene->keypoints[match.trainIdx].angle - forModel->keypoints[match.queryIdx].angle;
 
@@ -73,6 +74,11 @@ struct VotingMatrix {
             }
         }
 
+    }
+
+    inline void castVotes(std::vector<cv::DMatch> votes, RichImage* model, double collapseDistance = 5) {
+    	for (auto vote: votes)
+    		castVote(vote, model, collapseDistance);
     }
 
     inline void collapse(double collapsingDistance) {
@@ -294,8 +300,6 @@ struct VotingMatrix {
 
 };
 
-
-
 ///A class to handle the ght matching
 class GHTMatcher {
 
@@ -305,6 +309,7 @@ class GHTMatcher {
     double pruneDistance;
     double relativeThreshold;
     double absoluteThreshold;
+    cxxpool::thread_pool pool;
 
     VotingMatrix* votes;
 
@@ -315,7 +320,36 @@ class GHTMatcher {
         for (auto match : matches) {
                 votes->castVote(match, model, spread);
         }
+    }
 
+    inline void _parallel_ght(std::vector<RichImage*> models, Algorithm* algo, double spread = 10) {
+    	std::vector<std::future<std::vector<cv::DMatch>>> futures;
+    	std::vector<std::future<int>> finals;
+    	for (auto model : models) {
+    		futures.push_back(pool.push(findKnn, model->features, scene->features, algo->matcher, context["THRESHOLD"], true, true));
+    	}
+
+		std::chrono::microseconds span(0);
+
+    	int i=0, done = 0;
+    	while (done != futures.size()) {
+    		if (futures[i].valid() && futures[i].wait_for(span) == std::future_status::ready) {
+    			auto vec = futures[i].get();
+				finals.push_back(pool.push([=]() { votes->castVotes(vec, models[i], spread); return 1;} ));
+				///void could have been used instead of the hack-ish return 1, but this way is empirically faster (due to some compiler magic probably)
+				done++;
+    		}
+    		i++;
+    		i %= models.size();
+    	}
+
+    	i=0, done=0;
+    	while ( done != finals.size()) {
+    		if (finals[i].valid() && finals[i].wait_for(span) == std::future_status::ready)
+    			done++;
+    		i++;
+    		i %= models.size();
+    	}
     }
 
     public:
@@ -333,6 +367,8 @@ class GHTMatcher {
         this->relativeThreshold = relativeThreshold;
         this->absoluteThreshold = absoluteThreshold;
 
+        pool.add_threads(context.MODELS.size());
+
     }
 
     std::map<RichImage*, std::vector<Blob>> GHTMatch(std::vector<RichImage *> models, Algorithm* algo) {
@@ -342,9 +378,10 @@ class GHTMatcher {
 
         std::vector<Blob> allblobs;
         std::vector<size_t> indicesToRemove;
-        for (auto mp : models) {
-            _ghtmatch(mp, algo);
-        }
+//        for (auto mp : models) {
+//            _ghtmatch(mp, algo);
+//        }
+		_parallel_ght(models, algo);
 
 
 		votes -> collapse(collapseDistance);

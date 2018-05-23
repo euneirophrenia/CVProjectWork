@@ -19,7 +19,7 @@
 
   "MIN_HOUGH_VOTES" : 30, //not used right now, minimum votes automatically computed
 
-  "COLLAPSING_FACTOR" : 0.5, // leave 0.5 for normal use, use lower values for whole shelfs.
-  "PRUNING_FACTOR" : 0.5 // leave 0.5 for normal applications. use lower values for whole shelfs
+  "COLLAPSING_FACTOR" : 0.5, // leave 0.5 for normal use, use lower values for whole shelfs (0 is not a bad idea in that case)
+  "PRUNING_FACTOR" : 0.5 // leave 0.5 for normal applications. use lower values for whole shelfs (e.g. 0.1)
 
 }

@@ -147,23 +147,19 @@ struct RichImage {
 
         inline int actualScale() {
         	if (_scale < 0){
-				// compute mask (you could use a simple threshold if the image is always as good as the one you provided)
 				cv::Mat mask;
 				cv::threshold(image, mask, 0, 255, CV_THRESH_BINARY_INV | CV_THRESH_OTSU);
 
-				// find contours (if always so easy to segment as your image, you could just add the black/rect pixels to a vector)
 				std::vector<std::vector<cv::Point>> contours;
-				std::vector<cv::Vec4i> hierarchy;
 				cv::findContours(mask,contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
 				cv::Size2f maximum(0,0);
-				for( int i = 0; i< contours.size(); i++ )
-				{
+
+				for( int i = 0; i< contours.size(); i++ ) {
 
 					cv::Rect rect = cv::boundingRect(contours[i]);
 
-					if(rect.height > maximum.height )
-					{
+					if( rect.height > maximum.height) {
 						maximum.height = rect.height;
 					}
 				}

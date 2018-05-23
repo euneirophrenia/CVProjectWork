@@ -6,7 +6,6 @@
 #include "processing/GHTMatching.h"
 #include "utilities/cli.h"
 
-
 void displayGHTResults(std::map<RichImage*, std::vector<Blob>> results, cv::Mat* colorscene, Preprocesser preprocesser, RichImage* scene) {
 	for (auto match : results) {
 		auto ghtmatch = match.second;
